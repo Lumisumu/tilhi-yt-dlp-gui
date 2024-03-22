@@ -3,6 +3,7 @@ from PIL import Image, ImageTk
 import os
 import subprocess
 import string
+import random
 
 def resize_image(event):
     global resized_tk
@@ -60,8 +61,10 @@ window = tk.Tk()
 window.title("Tilhi - yt-dlp GUI")
 window.geometry("950x600")
 
-# Image file
-image_original = Image.open("cover-images/cover3.jpg")
+# Choose one of the three cover images at random
+random_number = random.randint(1, 3)
+image_name = "cover-images/cover" + str(random_number) + ".jpg"
+image_original = Image.open(image_name)
 image_ratio = image_original.size[0] / image_original.size[1]
 image_tk = ImageTk.PhotoImage(image_original)
 
