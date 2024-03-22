@@ -61,7 +61,7 @@ window.title("Tilhi - yt-dlp GUI")
 window.geometry("950x600")
 
 # Image file
-image_original = Image.open("cover-images/cover1.jpg")
+image_original = Image.open("cover-images/cover3.jpg")
 image_ratio = image_original.size[0] / image_original.size[1]
 image_tk = ImageTk.PhotoImage(image_original)
 
