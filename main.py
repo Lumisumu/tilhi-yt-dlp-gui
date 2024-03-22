@@ -57,7 +57,7 @@ def download_and_clip(start, end):
 
 # Create window, set size and window title
 window = tk.Tk()
-window.title("Tilhi - yt-dlp GUI")
+window.title("Tilhi - yt-dlp käyttöliittymä")
 window.geometry("950x600")
 
 # Image file
@@ -117,17 +117,17 @@ canvas.grid(row=0, column=0, sticky="nsew")
 canvas.bind("<Configure>", resize_image)
 
 # Content section 1: download url field
-url_label = tk.Label(file_info_frame, text="Download url:", font=('Arial', 15), height = 1)
+url_label = tk.Label(file_info_frame, text="Videon url-osoite:", font=('Arial', 15), height = 1)
 url_label.grid(row=0, column=0, sticky="e")
 url_field = tk.Entry(file_info_frame)
 url_field.grid(row=0, column=1, sticky="ew", padx=20)
 
 # Content section 2: clips text
-clips_label = tk.Label(timestamps_frame, text="Cut a clip", font=('Arial', 15), height = 1)
+clips_label = tk.Label(timestamps_frame, text="Leikkaa klippi", font=('Arial', 15), height = 1)
 clips_label.grid(row=0, column=0, sticky="e")
 
 # Clip section 2: clip start timestamp fields
-start_timestamp_label = tk.Label(timestamps_frame, text="Start timestamp:", font=('Arial', 15), height = 1)
+start_timestamp_label = tk.Label(timestamps_frame, text="Aloitusaika:", font=('Arial', 15), height = 1)
 start_timestamp_label.grid(row=1, column=0, sticky="e")
 start_hours_field = tk.Entry(timestamps_frame, justify="center")
 start_hours_field.grid(row=1, column=1, padx=20)
@@ -141,7 +141,7 @@ start_seconds_field = tk.Entry(timestamps_frame, justify="center")
 start_seconds_field.grid(row=1, column=5, padx=20)
 
 # Clip section 2: clip end timestamp fields
-end_timestamp_label = tk.Label(timestamps_frame, text="End timestamp:", font=('Arial', 15), height = 1)
+end_timestamp_label = tk.Label(timestamps_frame, text="Lopetusaika:", font=('Arial', 15), height = 1)
 end_timestamp_label.grid(row=2, column=0, sticky="e")
 end_hours_field = tk.Entry(timestamps_frame, justify="center")
 end_hours_field.grid(row=2, column=1, padx=20)
@@ -155,11 +155,11 @@ end_seconds_field = tk.Entry(timestamps_frame, justify="center")
 end_seconds_field.grid(row=2, column=5, padx=20)
 
 # Clip section 2: keep original video
-keep_original_checkbutton = tk.Checkbutton(timestamps_frame, text="Delete full video", font=('Arial', 13), variable=checkbox_keep_original, onvalue="On", offvalue="Off")
+keep_original_checkbutton = tk.Checkbutton(timestamps_frame, text="Poista alkuperäinen", font=('Arial', 13), variable=checkbox_keep_original, onvalue="On", offvalue="Off")
 keep_original_checkbutton.grid(row=3, column=1, sticky="ew", padx=15)
 
 # Button to start download
-start_button = tk.Button(side_frame, text="Start Download", font=('Arial', 15), command=start_download, height = 1, width = 15)
+start_button = tk.Button(side_frame, text="Aloita lataus", font=('Arial', 15), command=start_download, height = 1, width = 15)
 start_button.grid(row=4, column=0, sticky="e", padx=30, pady=30)
 
 # Start process
