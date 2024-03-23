@@ -32,6 +32,20 @@ Start program by running:
 python main.py
 ```
 
+## Build executable
+
+Install PyInstaller with pip:
+
+```
+pip install pyinstaller
+```
+
+Run in project folder:
+
+```
+pyinstaller --icon=tilhi-icon.ico main.py --onefile
+```
+
 ## Credits and learning links
 
 Image resizing tutorial by Atlas: https://www.youtube.com/watch?v=VnwDPa9biwc
