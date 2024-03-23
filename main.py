@@ -25,19 +25,27 @@ def resize_image(event):
     canvas.create_image(int(event.width / 2), int(event.height / 2), anchor="center", image=resized_tk)
 
 def start_download():
-    start_timestamp = start_hours_field.get() + ":" + start_minutes_field.get() + ":" + start_seconds_field.get()
-    end_timestamp = end_hours_field.get() + ":" + end_minutes_field.get() + ":" + end_seconds_field.get()
+    if url_field.get() != "":
 
-    if end_timestamp != "00:00:00":
-        download_and_clip(start_timestamp, end_timestamp)
+        start_timestamp = start_hours_field.get() + ":" + start_minutes_field.get() + ":" + start_seconds_field.get()
+        end_timestamp = end_hours_field.get() + ":" + end_minutes_field.get() + ":" + end_seconds_field.get()
 
-        if checkbox_keep_original.get() == "On":
-            file_name = subprocess.getoutput('yt-dlp --print filename ' + url_field.get())
-            file_name = file_name.replace("WARNING: [generic] Falling back on generic information extractor", "")
-            file_name = ''.join(file_name.splitlines())
-            os.remove(file_name)
+        file_name = subprocess.getoutput('yt-dlp --print filename ' + url_field.get())
+        file_name = file_name.replace("WARNING: [generic] Falling back on generic information extractor", "")
+        file_name = ''.join(file_name.splitlines())
+
+        if end_timestamp != "00:00:00":
+            download_and_clip(start_timestamp, end_timestamp)
+
+            if checkbox_keep_original.get() == "On":
+                os.remove(file_name)
+        else:
+            normal_download()
+
+        status_text.set("Downloaded: " + file_name)
+
     else:
-        normal_download()
+        status_text.set("Error: url field is empty.")
 
 def normal_download():
     # Download video with yt-dlp
@@ -56,6 +64,10 @@ def download_and_clip(start, end):
     cutter = 'ffmpeg -ss ' + start + ' -to ' + end + ' -i "' + file_name + '" -c copy clip.webm'
     subprocess.run(cutter, shell=True)
 
+def update_ytdlp():
+    subprocess.run("yt-dlp --update", shell=True)
+    status_text.set("yt-dlp updated.")
+
 # Create window, set size and window title
 window = tk.Tk()
 window.title("Tilhi - yt-dlp GUI")
@@ -72,6 +84,8 @@ image_tk = ImageTk.PhotoImage(image_original)
 checkbox_keep_original = tk.StringVar(value="Off")
 start_timestamp = "00:00:00"
 end_timestamp = "00:00:00"
+status_text = tk.StringVar()
+status_text.set("Input url and press Start to download.")
 
 ### GRIDS ###
 
@@ -111,6 +125,14 @@ timestamps_frame.rowconfigure(0, weight=3)
 timestamps_frame.rowconfigure(1, weight=1)
 timestamps_frame.rowconfigure(2, weight=1)
 timestamps_frame.rowconfigure(3, weight=1)
+
+# 3rd content frame: buttons
+buttons_frame = tk.Frame(side_frame)
+buttons_frame.grid(row=4, column=0, sticky="nsew")
+buttons_frame.columnconfigure(0, weight=1)
+buttons_frame.columnconfigure(1, weight=3)
+buttons_frame.columnconfigure(2, weight=1)
+buttons_frame.rowconfigure(0, weight=1)
 
 ### CONTENT ###
 
@@ -161,9 +183,17 @@ end_seconds_field.grid(row=2, column=5, padx=20)
 keep_original_checkbutton = tk.Checkbutton(timestamps_frame, text="Delete full video", font=('Arial', 13), variable=checkbox_keep_original, onvalue="On", offvalue="Off")
 keep_original_checkbutton.grid(row=3, column=1, sticky="ew", padx=15)
 
+# Button to update yt-dlp
+ytdlp_update_button = tk.Button(buttons_frame, text="Update yt-dlp", font=('Arial', 13), command=update_ytdlp, height = 1, width = 13)
+ytdlp_update_button.grid(row=0, column=0, sticky="e", padx=30, pady=30)
+
+# Status text for guiding user
+status_label = tk.Label(buttons_frame, textvariable=status_text, font=('Arial', 13), wraplength=300, width=30, anchor="w")
+status_label.grid(row=0, column=1, sticky="w")
+
 # Button to start download
-start_button = tk.Button(side_frame, text="Start Download", font=('Arial', 15), command=start_download, height = 1, width = 15)
-start_button.grid(row=4, column=0, sticky="e", padx=30, pady=30)
+start_button = tk.Button(buttons_frame, text="Start Download", font=('Arial', 15), command=start_download, height = 1, width = 15)
+start_button.grid(row=0, column=2, sticky="e", padx=30, pady=30)
 
 # Start process
 window.mainloop()
