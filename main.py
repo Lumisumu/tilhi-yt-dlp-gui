@@ -75,6 +75,7 @@ def update_ytdlp():
 window = tk.Tk()
 window.title("Tilhi - yt-dlp GUI")
 window.geometry("950x600")
+window.iconbitmap("tilhi-icon.ico")
 
 # Choose one of the three cover images at random
 random_number = random.randint(1, 3)
