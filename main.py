@@ -4,6 +4,7 @@ import os
 import subprocess
 import string
 import random
+import threading as th
 
 def resize_image(event):
     global resized_tk
@@ -34,15 +35,16 @@ def start_download():
         file_name = file_name.replace("WARNING: [generic] Falling back on generic information extractor", "")
         file_name = ''.join(file_name.splitlines())
 
-        if end_timestamp != "00:00:00":
+        if end_timestamp != "::":
             download_and_clip(start_timestamp, end_timestamp)
 
             if checkbox_keep_original.get() == "On":
                 os.remove(file_name)
         else:
-            normal_download()
+            thread = th.Thread(target=normal_download)
+            thread.start()
 
-        status_text.set("Downloaded: " + file_name)
+        status_text.set("Download started for: " + file_name)
 
     else:
         status_text.set("Error: url field is empty.")
@@ -53,7 +55,8 @@ def normal_download():
     subprocess.run(command, shell=True)
 
 def download_and_clip(start, end):
-    normal_download()
+    thread = th.Thread(target=normal_download)
+    thread.start()
 
     # Get video file name
     file_name = subprocess.getoutput('yt-dlp --print filename ' + url_field.get())
