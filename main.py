@@ -27,22 +27,43 @@ def resize_image(event):
 
 def start_download():
     if url_field.get() != "":
-
-        start_timestamp = start_hours_field.get() + ":" + start_minutes_field.get() + ":" + start_seconds_field.get()
-        end_timestamp = end_hours_field.get() + ":" + end_minutes_field.get() + ":" + end_seconds_field.get()
-
+        # Get video file name and modify it for file naming purpose
         file_name = subprocess.getoutput('yt-dlp --print filename ' + url_field.get())
         file_name = file_name.replace("WARNING: [generic] Falling back on generic information extractor", "")
         file_name = ''.join(file_name.splitlines())
 
+        end_timestamp = end_hours_field.get() + ":" + end_minutes_field.get() + ":" + end_seconds_field.get()
+
         if end_timestamp != "::":
+            # Arrays for timestamp editing
+            timestamp_numbers = []
+            edited_timestamps = []
+            timestamp_numbers.extend([start_hours_field.get(), start_minutes_field.get(), start_seconds_field.get(), end_hours_field.get(), end_minutes_field.get(), end_seconds_field.get()])
+
+
+            for i in range(len(timestamp_numbers)):
+                if not timestamp_numbers[i]:
+                    # If the item is empty, replace it with "hello"
+                    timestamp_numbers[i] = "00"
+
+            # Handle timestamps to proper format
+            for s in timestamp_numbers:
+                # Trim to only two first numbers
+                if len(s) > 2:
+                    new_string = s[:2]
+                # Add missing number if only one number
+                elif len(s) == 1:
+                    new_string = '0' + s
+                else:
+                    new_string = s
+
+                edited_timestamps.append(new_string)
+
+            start_timestamp = edited_timestamps[0] + ":" + edited_timestamps[1] + ":" + edited_timestamps[2]
+            end_timestamp = edited_timestamps[3] + ":" + edited_timestamps[4] + ":" + edited_timestamps[5]
+
             command = 'yt-dlp ' + url_field.get()
             subprocess.run(command, shell=True)
-
-            # Get video file name
-            file_name = subprocess.getoutput('yt-dlp --print filename ' + url_field.get())
-            file_name = file_name.replace("WARNING: [generic] Falling back on generic information extractor", "")
-            file_name = ''.join(file_name.splitlines())
 
             # Cut video with ffmpeg
             cutter = 'ffmpeg -ss ' + start_timestamp + ' -to ' + end_timestamp + ' -i "' + file_name + '" -c copy "clip - ' + file_name + '"'
@@ -82,6 +103,8 @@ start_timestamp = "00:00:00"
 end_timestamp = "00:00:00"
 status_text = tk.StringVar()
 status_text.set("Input url and press Start to download.")
+timestamp_numbers = []
+edited_timestamps = []
 
 ### GRIDS ###
 
