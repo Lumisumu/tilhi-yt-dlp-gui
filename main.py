@@ -36,36 +36,28 @@ def start_download():
         file_name = ''.join(file_name.splitlines())
 
         if end_timestamp != "::":
-            download_and_clip(start_timestamp, end_timestamp)
+            command = 'yt-dlp ' + url_field.get()
+            subprocess.run(command, shell=True)
+
+            # Get video file name
+            file_name = subprocess.getoutput('yt-dlp --print filename ' + url_field.get())
+            file_name = file_name.replace("WARNING: [generic] Falling back on generic information extractor", "")
+            file_name = ''.join(file_name.splitlines())
+
+            # Cut video with ffmpeg
+            cutter = 'ffmpeg -ss ' + start_timestamp + ' -to ' + end_timestamp + ' -i "' + file_name + '" -c copy "clip - ' + file_name + '"'
+            subprocess.run(cutter, shell=True)
 
             if checkbox_keep_original.get() == "On":
                 os.remove(file_name)
         else:
-            thread = th.Thread(target=normal_download)
-            thread.start()
+            command = 'yt-dlp ' + url_field.get()
+            subprocess.run(command, shell=True)
 
-        status_text.set("Download started for: " + file_name)
+        status_text.set("Download finished: " + file_name)
 
     else:
         status_text.set("Error: url field is empty.")
-
-def normal_download():
-    # Download video with yt-dlp
-    command = 'yt-dlp ' + url_field.get()
-    subprocess.run(command, shell=True)
-
-def download_and_clip(start, end):
-    thread = th.Thread(target=normal_download)
-    thread.start()
-
-    # Get video file name
-    file_name = subprocess.getoutput('yt-dlp --print filename ' + url_field.get())
-    file_name = file_name.replace("WARNING: [generic] Falling back on generic information extractor", "")
-    file_name = ''.join(file_name.splitlines())
-
-    # Cut video with ffmpeg
-    cutter = 'ffmpeg -ss ' + start + ' -to ' + end + ' -i "' + file_name + '" -c copy clip.webm'
-    subprocess.run(cutter, shell=True)
 
 def update_ytdlp():
     subprocess.run("yt-dlp --update", shell=True)
@@ -196,7 +188,7 @@ status_label = tk.Label(buttons_frame, textvariable=status_text, font=('Arial', 
 status_label.grid(row=0, column=1, sticky="w")
 
 # Button to start download
-start_button = tk.Button(buttons_frame, text="Start Download", font=('Arial', 15), command=start_download, height = 1, width = 15)
+start_button = tk.Button(buttons_frame, text="Start Download", font=('Arial', 15), command=lambda: th.Thread(target=start_download).start(), height = 1, width = 15)
 start_button.grid(row=0, column=2, sticky="e", padx=30, pady=30)
 
 # Start process
