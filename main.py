@@ -27,19 +27,29 @@ def resize_image(event):
 
 def start_download():
     if url_field.get() != "":
+
+        # If user has defined custom save location, replace default. Otherwise, save to /output
+        # Add custom location for clips later
+        if folder_field.get() != "":
+            video_target_folder = folder_field.get()
+        else:
+            video_target_folder = "output"
+
+        # yt-dlp command to download the video
+        command = 'yt-dlp -P ' + video_target_folder + " " + url_field.get()
+
         # Get video file name and modify it for file naming purpose
         file_name = subprocess.getoutput('yt-dlp --print filename ' + url_field.get())
         file_name = file_name.replace("WARNING: [generic] Falling back on generic information extractor", "")
         file_name = ''.join(file_name.splitlines())
 
-        end_timestamp = end_hours_field.get() + ":" + end_minutes_field.get() + ":" + end_seconds_field.get()
+        # Arrays for timestamp editing
+        timestamp_numbers = []
+        timestamp_numbers.extend([start_hours_field.get(), start_minutes_field.get(), start_seconds_field.get(), end_hours_field.get(), end_minutes_field.get(), end_seconds_field.get()])
 
-        if end_timestamp != "::":
-            # Arrays for timestamp editing
-            timestamp_numbers = []
+        # If end timestamp fields have any entries, make a clip. Otherwise only download.
+        if timestamp_numbers[3] != "" or timestamp_numbers[4] != "" or timestamp_numbers[5] != "":
             edited_timestamps = []
-            timestamp_numbers.extend([start_hours_field.get(), start_minutes_field.get(), start_seconds_field.get(), end_hours_field.get(), end_minutes_field.get(), end_seconds_field.get()])
-
 
             for i in range(len(timestamp_numbers)):
                 if not timestamp_numbers[i]:
@@ -62,17 +72,18 @@ def start_download():
             start_timestamp = edited_timestamps[0] + ":" + edited_timestamps[1] + ":" + edited_timestamps[2]
             end_timestamp = edited_timestamps[3] + ":" + edited_timestamps[4] + ":" + edited_timestamps[5]
 
-            command = 'yt-dlp ' + url_field.get()
+            # Start download
             subprocess.run(command, shell=True)
 
             # Cut video with ffmpeg
-            cutter = 'ffmpeg -ss ' + start_timestamp + ' -to ' + end_timestamp + ' -i "' + file_name + '" -c copy "clip - ' + file_name + '"'
+            cutter = 'ffmpeg -ss ' + start_timestamp + ' -to ' + end_timestamp + ' -i "' + video_target_folder + "/" + file_name + '" -c copy "clip - ' + file_name + '"'
             subprocess.run(cutter, shell=True)
 
             if checkbox_keep_original.get() == "On":
                 os.remove(file_name)
+
         else:
-            command = 'yt-dlp ' + url_field.get()
+            # Start download
             subprocess.run(command, shell=True)
 
         status_text.set("Download finished: " + file_name)
@@ -97,14 +108,16 @@ image_original = Image.open(image_name)
 image_ratio = image_original.size[0] / image_original.size[1]
 image_tk = ImageTk.PhotoImage(image_original)
 
-# Storing variables
-checkbox_keep_original = tk.StringVar(value="Off")
-start_timestamp = "00:00:00"
-end_timestamp = "00:00:00"
+# Status text variable
 status_text = tk.StringVar()
 status_text.set("Input url and press Start to download.")
-timestamp_numbers = []
-edited_timestamps = []
+
+# User selections
+video_target_folder = "/full-videos"
+clip_target_folder = "/clips"
+start_timestamp = "00:00:00"
+end_timestamp = "00:00:00"
+checkbox_keep_original = tk.StringVar(value="Off")
 
 ### GRIDS ###
 
@@ -122,6 +135,7 @@ side_frame.rowconfigure(1, weight=1)
 side_frame.rowconfigure(2, weight=1)
 side_frame.rowconfigure(3, weight=1)
 side_frame.rowconfigure(4, weight=1)
+side_frame.rowconfigure(5, weight=1)
 
 # 1st content frame: file settings
 file_info_frame = tk.Frame(side_frame)
@@ -129,7 +143,9 @@ file_info_frame.grid(row=1, column=0, sticky="nsew")
 file_info_frame.columnconfigure(0, weight=1)
 file_info_frame.columnconfigure(1, weight=3)
 file_info_frame.columnconfigure(2, weight=1)
-file_info_frame.rowconfigure(0, weight=1)
+file_info_frame.rowconfigure(0, weight=3)
+file_info_frame.rowconfigure(1, weight=3)
+file_info_frame.rowconfigure(2, weight=1)
 
 # 2nd content frame: timestamps
 timestamps_frame = tk.Frame(side_frame)
@@ -161,10 +177,18 @@ canvas.grid(row=0, column=0, sticky="nsew")
 canvas.bind("<Configure>", resize_image)
 
 # Content section 1: download url field
-url_label = tk.Label(file_info_frame, text="Download url:", font=('Arial', 15), height = 1)
+url_label = tk.Label(file_info_frame, text="Download url:*", font=('Arial', 15), height = 1)
 url_label.grid(row=0, column=0, sticky="e")
 url_field = tk.Entry(file_info_frame)
 url_field.grid(row=0, column=1, sticky="ew", padx=20)
+
+# Content section 1: folder selection field
+folder_label = tk.Label(file_info_frame, text="Save location:", font=('Arial', 15), height = 1)
+folder_label.grid(row=1, column=0, sticky="e")
+folder_field = tk.Entry(file_info_frame)
+folder_field.grid(row=1, column=1, sticky="ew", padx=20)
+folder_tips_label = tk.Label(file_info_frame, text="If left empty, /output folder will be created at the location of tilhi.exe.", font=('Arial', 11), height = 1)
+folder_tips_label.grid(row=2, column=1, sticky="w", padx=20)
 
 # Content section 2: clips text
 clips_label = tk.Label(timestamps_frame, text="Cut a clip", font=('Arial', 15), height = 1)
@@ -213,6 +237,9 @@ status_label.grid(row=0, column=1, sticky="w")
 # Button to start download
 start_button = tk.Button(buttons_frame, text="Start Download", font=('Arial', 15), command=lambda: th.Thread(target=start_download).start(), height = 1, width = 15)
 start_button.grid(row=0, column=2, sticky="e", padx=30, pady=30)
+
+required_label = tk.Label(side_frame, text="* = Required field", font=('Arial', 11), wraplength=300, width=30, anchor="w")
+required_label.grid(row=5, column=0, sticky="w", padx=20)
 
 # Start process
 window.mainloop()
