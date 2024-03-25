@@ -16,6 +16,12 @@ Extract ffmpeg folder. Move both yt-dlp.exe and ffmpeg.exe to the same folder wh
 
 Launch program by double clicking Tilhi.
 
+## How to use
+
+Only required field is url address. There are also option for audio track only and making a clip.
+
+If you want to make multiple clips of the same video, wait until the download is finished and add new timestamps while the same url is in the field. This will not download the video multiple times, it will only create a clip if the same video is found in the folder.
+
 ## Installing and running project
 
 Install Python 3 and pip: https://www.python.org/

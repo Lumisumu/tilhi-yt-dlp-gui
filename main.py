@@ -89,7 +89,7 @@ def start_download():
             # Start download
             subprocess.run(command, shell=True)
 
-            # Make a clip with FFmpeg
+            # Make a clip with FFmpeg, replace file extension if audio track only is selected
             if checkbox_only_audio.get() == "On":
                 file_name = file_name[:-4]
                 file_name += "m4a"
