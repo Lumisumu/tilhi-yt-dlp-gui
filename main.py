@@ -46,8 +46,11 @@ def start_download():
         if not os.path.exists(clip_target_folder):
             os.makedirs(clip_target_folder)
 
-        # yt-dlp command to download the video
-        command = 'yt-dlp -P ' + video_target_folder + " " + url_field.get()
+        # Create yt-dlp command to download the video
+        if checkbox_only_audio.get() == "On":
+            command = 'yt-dlp -P ' + video_target_folder + " -f 140 " + url_field.get()
+        else:
+            command = 'yt-dlp -P ' + video_target_folder + " " + url_field.get()
 
         # Get video file name and modify it for file naming purpose
         file_name = subprocess.getoutput('yt-dlp --print filename ' + url_field.get())
@@ -86,8 +89,13 @@ def start_download():
             # Start download
             subprocess.run(command, shell=True)
 
-            # Cut video with ffmpeg
-            cutter = 'ffmpeg -ss ' + start_timestamp + ' -to ' + end_timestamp + ' -i "' + video_target_folder + "/" + file_name + '" -c copy "' + clip_target_folder + '/' + 'clip - ' + file_name + '"'
+            # Make a clip with FFmpeg
+            if checkbox_only_audio.get() == "On":
+                file_name = file_name[:-4]
+                file_name += "m4a"
+                cutter = 'ffmpeg -ss ' + start_timestamp + ' -to ' + end_timestamp + ' -i "' + video_target_folder + "/" + file_name + '" -c copy "' + clip_target_folder + '/' + 'clip - ' + file_name + '"'
+            else:
+                cutter = 'ffmpeg -ss ' + start_timestamp + ' -to ' + end_timestamp + ' -i "' + video_target_folder + "/" + file_name + '" -c copy "' + clip_target_folder + '/' + 'clip - ' + file_name + '"'
             subprocess.run(cutter, shell=True)
 
             if checkbox_keep_original.get() == "On":
@@ -129,6 +137,7 @@ clip_target_folder = "clips"
 start_timestamp = "00:00:00"
 end_timestamp = "00:00:00"
 checkbox_keep_original = tk.StringVar(value="Off")
+checkbox_only_audio = tk.StringVar(value="Off")
 
 ### GRIDS ###
 
@@ -158,6 +167,7 @@ file_info_frame.rowconfigure(0, weight=3)
 file_info_frame.rowconfigure(1, weight=3)
 file_info_frame.rowconfigure(2, weight=3)
 file_info_frame.rowconfigure(3, weight=1)
+file_info_frame.rowconfigure(4, weight=1)
 
 # 2nd content frame: timestamps
 timestamps_frame = tk.Frame(side_frame)
@@ -194,21 +204,25 @@ url_label.grid(row=0, column=0, sticky="e")
 url_field = tk.Entry(file_info_frame)
 url_field.grid(row=0, column=1, sticky="ew", padx=20)
 
+# Content section 1: only audio
+only_audio_checkbutton = tk.Checkbutton(file_info_frame, text="Download only audio track", font=('Arial', 13), variable=checkbox_only_audio, onvalue="On", offvalue="Off")
+only_audio_checkbutton.grid(row=1, column=1, sticky="w", padx=15)
+
 # Content section 1: full video folder selection field
 full_video_folder_label = tk.Label(file_info_frame, text="Full video save location:", font=('Arial', 15), height = 1)
-full_video_folder_label.grid(row=1, column=0, sticky="e")
+full_video_folder_label.grid(row=2, column=0, sticky="e")
 full_video_folder_field = tk.Entry(file_info_frame)
-full_video_folder_field.grid(row=1, column=1, sticky="ew", padx=20)
+full_video_folder_field.grid(row=2, column=1, sticky="ew", padx=20)
 
 # Content section 1: clip folder selection field
 clip_folder_label = tk.Label(file_info_frame, text="Clip save location:", font=('Arial', 15), height = 1)
-clip_folder_label.grid(row=2, column=0, sticky="e")
+clip_folder_label.grid(row=3, column=0, sticky="e")
 clip_folder_field = tk.Entry(file_info_frame)
-clip_folder_field.grid(row=2, column=1, sticky="ew", padx=20)
+clip_folder_field.grid(row=3, column=1, sticky="ew", padx=20)
 
-# 
+# Content section 1: note about file locations
 folder_tips_label = tk.Label(file_info_frame, text="If save locations are left empty, new folders will be created in exe's folder.", font=('Arial', 11), height = 1)
-folder_tips_label.grid(row=3, column=1, sticky="w", padx=20)
+folder_tips_label.grid(row=4, column=1, sticky="w", padx=20)
 
 # Content section 2: clips text
 clips_label = tk.Label(timestamps_frame, text="Cut a clip", font=('Arial', 15), height = 1)
