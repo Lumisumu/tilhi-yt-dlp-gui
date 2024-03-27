@@ -117,7 +117,7 @@ def update_ytdlp():
 # Create window, set size and window title
 window = tk.Tk()
 window.title("Tilhi - yt-dlp käyttöliittymä")
-window.geometry("950x600")
+window.geometry("1000x650")
 window.iconbitmap("tilhi-icon.ico")
 
 # Choose one of the three cover images at random
@@ -209,19 +209,19 @@ only_audio_checkbutton = tk.Checkbutton(file_info_frame, text="Lataa vain ääni
 only_audio_checkbutton.grid(row=1, column=1, sticky="w", padx=15)
 
 # Content section 1: full video folder selection field
-full_video_folder_label = tk.Label(file_info_frame, text="Tallennuskansio videoille:", font=('Arial', 15), height = 1)
+full_video_folder_label = tk.Label(file_info_frame, text="Tallennuskansio videoille:", wraplength=200, font=('Arial', 15), height = 2)
 full_video_folder_label.grid(row=2, column=0, sticky="e")
 full_video_folder_field = tk.Entry(file_info_frame)
 full_video_folder_field.grid(row=2, column=1, sticky="ew", padx=20)
 
 # Content section 1: clip folder selection field
-clip_folder_label = tk.Label(file_info_frame, text="Tallennuskansio klipeille:", font=('Arial', 15), height = 1)
+clip_folder_label = tk.Label(file_info_frame, text="Tallennuskansio klipeille:", wraplength=200, font=('Arial', 15), height = 2)
 clip_folder_label.grid(row=3, column=0, sticky="e")
 clip_folder_field = tk.Entry(file_info_frame)
 clip_folder_field.grid(row=3, column=1, sticky="ew", padx=20)
 
 # Content section 1: note about file locations
-folder_tips_label = tk.Label(file_info_frame, text="Jos tallennuskansioiden valinta jätetään tyhjäksi, uudet kansiot luodaan ohjelman kansioon.", font=('Arial', 11), height = 1)
+folder_tips_label = tk.Label(file_info_frame, text="Jos valinta jätetään tyhjäksi, kansio luodaan ohjelman omaan kansioon.", font=('Arial', 11), height = 1)
 folder_tips_label.grid(row=4, column=1, sticky="w", padx=20)
 
 # Content section 2: clips text
