@@ -49,7 +49,7 @@ pip install pyinstaller
 Run in project folder:
 
 ```
-pyinstaller --icon=tilhi-icon.ico main.py --onefile
+pyinstaller --icon=res/tilhi-icon.ico main.py --onefile
 ```
 
 ## Credits and learning links

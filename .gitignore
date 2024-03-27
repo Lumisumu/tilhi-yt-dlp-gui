@@ -166,3 +166,6 @@ ffmpeg.exe
 # Default video save locations
 /full-videos
 /clips
+
+# Release folders
+/release
