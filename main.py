@@ -100,7 +100,7 @@ def start_download():
 
             if checkbox_keep_original.get() == "On":
                 string = video_target_folder + "/" + file_name
-                os.remove(file_name)
+                os.remove(string)
 
         else:
             # Start download
