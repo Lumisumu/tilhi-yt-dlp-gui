@@ -29,8 +29,8 @@ def start_download():
     if url_field.get() != "":
 
         # Set full video save location
-        if clip_folder_field.get() != "":
-            video_target_folder = clip_folder_field.get()
+        if full_video_folder_field.get() != "":
+            video_target_folder = full_video_folder_field.get()
         else:
             video_target_folder = "full-videos"
 
@@ -99,37 +99,38 @@ def start_download():
             subprocess.run(cutter, shell=True)
 
             if checkbox_keep_original.get() == "On":
-                os.remove(file_name)
+                string = video_target_folder + "/" + file_name
+                os.remove(string)
 
         else:
             # Start download
             subprocess.run(command, shell=True)
 
-        status_text.set("Download finished: " + file_name)
+        status_text.set("Lataus valmis: " + file_name)
 
     else:
-        status_text.set("Error: url field is empty.")
+        status_text.set("Virhe: url-osoitekenttä on tyhjä..")
 
 def update_ytdlp():
     subprocess.run("yt-dlp --update", shell=True)
-    status_text.set("yt-dlp updated.")
+    status_text.set("yt-dlp päivitetty.")
 
 # Create window, set size and window title
 window = tk.Tk()
 window.title("Tilhi - yt-dlp käyttöliittymä")
 window.geometry("1000x650")
-window.iconbitmap("tilhi-icon.ico")
+window.iconbitmap("res/tilhi-icon.ico")
 
 # Choose one of the three cover images at random
 random_number = random.randint(1, 3)
-image_name = "cover-images/cover" + str(random_number) + ".jpg"
+image_name = "res/cover" + str(random_number) + ".jpg"
 image_original = Image.open(image_name)
 image_ratio = image_original.size[0] / image_original.size[1]
 image_tk = ImageTk.PhotoImage(image_original)
 
 # Status text variable
 status_text = tk.StringVar()
-status_text.set("Input url and press Start to download.")
+status_text.set("Syötä url-osoite ja paina Aloita lataus -nappia.")
 
 # User selections
 video_target_folder = "full-videos"
