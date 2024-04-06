@@ -5,6 +5,7 @@ import subprocess
 import string
 import random
 import threading as th
+import glob
 
 def resize_image(event):
     global resized_tk
@@ -50,12 +51,7 @@ def start_download():
         if checkbox_only_audio.get() == "On":
             command = 'yt-dlp -P ' + video_target_folder + " -f 140 " + url_field.get()
         else:
-            command = 'yt-dlp -P ' + video_target_folder + " " + url_field.get()
-
-        # Get video file name and modify it for file naming purpose
-        file_name = subprocess.getoutput('yt-dlp --print filename ' + url_field.get())
-        file_name = file_name.replace("WARNING: [generic] Falling back on generic information extractor", "")
-        file_name = ''.join(file_name.splitlines())
+            command = 'yt-dlp -P ' + video_target_folder + " " + url_field.get()      
 
         # Arrays for timestamp editing
         timestamp_numbers = []
@@ -83,27 +79,41 @@ def start_download():
 
                 edited_timestamps.append(new_string)
 
+            # Timestamp field into one string
             start_timestamp = edited_timestamps[0] + ":" + edited_timestamps[1] + ":" + edited_timestamps[2]
             end_timestamp = edited_timestamps[3] + ":" + edited_timestamps[4] + ":" + edited_timestamps[5]
 
             # Start download
             subprocess.run(command, shell=True)
 
-            # Make a clip with FFmpeg, replace file extension if audio track only is selected
+            # Get latest file name
+            file_location = video_target_folder + "/*"
+            list_of_files = glob.glob(file_location)
+            file_name = max(list_of_files, key=os.path.getctime)
+
+            # Remove folder name and "\" from the string to get only the video file name
+            file_name = file_name.replace("\\", "")
+            file_name = file_name.replace(video_target_folder, "")
+
+            # Create ffmpeg command for cutting a clip
             if checkbox_only_audio.get() == "On":
                 file_name = file_name[:-4]
                 file_name += "m4a"
                 cutter = 'ffmpeg -ss ' + start_timestamp + ' -to ' + end_timestamp + ' -i "' + video_target_folder + "/" + file_name + '" -c copy "' + clip_target_folder + '/' + 'clip - ' + file_name + '"'
             else:
                 cutter = 'ffmpeg -ss ' + start_timestamp + ' -to ' + end_timestamp + ' -i "' + video_target_folder + "/" + file_name + '" -c copy "' + clip_target_folder + '/' + 'clip - ' + file_name + '"'
+                print(cutter)
+            
+            # Run the ffmpeg command
             subprocess.run(cutter, shell=True)
 
+            # Remove original full video file if user wants it deleted
             if checkbox_keep_original.get() == "On":
                 string = video_target_folder + "/" + file_name
                 os.remove(string)
 
         else:
-            # Start download
+            # Only download video
             subprocess.run(command, shell=True)
 
         status_text.set("Download finished: " + file_name)
