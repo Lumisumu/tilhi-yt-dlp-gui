@@ -128,18 +128,18 @@ def start_download():
             list_of_files = glob.glob(file_location)
             file_name = max(list_of_files, key=os.path.getctime)
 
-        status_text.set("Download finished: " + file_name)
+        status_text.set("Lataus valmis: " + file_name)
 
     else:
-        status_text.set("Error: url field is empty.")
+        status_text.set("Virhe: url kenttä on tyhjä.")
 
 def update_ytdlp():
     subprocess.run("yt-dlp --update", shell=True)
-    status_text.set("yt-dlp updated.")
+    status_text.set("yt-dlp päivitetty.")
 
 # Create window, set size and window title
 window = tk.Tk()
-window.title("Tilhi - yt-dlp GUI")
+window.title("Tilhi - yt-dlp käyttöliittymä")
 window.geometry("950x550")
 window.iconbitmap("res/tilhi-icon.ico")
 
@@ -152,7 +152,7 @@ image_tk = ImageTk.PhotoImage(image_original)
 
 # Status text variable
 status_text = tk.StringVar()
-status_text.set("Input url and press Start to download.")
+status_text.set("Syötä url-osoite ja paina Aloita lataus -nappia.")
 
 # User selections
 video_target_folder = "full-videos"
@@ -228,33 +228,33 @@ canvas.grid(row=0, column=0, sticky="nsew")
 canvas.bind("<Configure>", resize_image)
 
 # Content section 1: download url field
-url_label = tk.Label(file_info_frame, text="Download url:*", font=('Arial', 15), height = 1)
+url_label = tk.Label(file_info_frame, text="Videon url-osoite:*", font=('Arial', 15), height = 1)
 url_label.grid(row=0, column=0, sticky="e")
 url_field = tk.Entry(file_info_frame)
 url_field.grid(row=0, column=1, sticky="ew", padx=20)
 
 # Content section 1: only audio
-only_audio_checkbutton = tk.Checkbutton(file_info_frame, text="Download only audio track",  font=('Arial', 13), variable=checkbox_only_audio, onvalue="On", offvalue="Off")
+only_audio_checkbutton = tk.Checkbutton(file_info_frame, text="Lataa vain ääniraita",  font=('Arial', 13), variable=checkbox_only_audio, onvalue="On", offvalue="Off")
 only_audio_checkbutton.grid(row=1, column=1, sticky="w", padx=15)
 
 # Content section 1: full video folder selection field
-full_video_folder_label = tk.Label(file_info_frame, text="Full video save location:", wraplength=200, font=('Arial', 15), height = 2)
+full_video_folder_label = tk.Label(file_info_frame, text="Tallennuskansio videoille:", wraplength=200, font=('Arial', 15), height = 2)
 full_video_folder_label.grid(row=2, column=0, sticky="e")
 full_video_folder_field = tk.Entry(file_info_frame)
 full_video_folder_field.grid(row=2, column=1, sticky="ew", padx=20)
 
 # Content section 1: clip folder selection field
-clip_folder_label = tk.Label(file_info_frame, text="Clip save location:", wraplength=200, font=('Arial', 15), height = 2)
+clip_folder_label = tk.Label(file_info_frame, text="Tallennuskansio klipeille:", wraplength=200, font=('Arial', 15), height = 2)
 clip_folder_label.grid(row=3, column=0, sticky="e")
 clip_folder_field = tk.Entry(file_info_frame)
 clip_folder_field.grid(row=3, column=1, sticky="ew", padx=20)
 
 # Content section 1: note about file locations
-folder_tips_label = tk.Label(file_info_frame, text="If save locations are left empty, new folders will be created in exe's folder.", font=('Arial', 11), height = 1)
+folder_tips_label = tk.Label(file_info_frame, text='Oletuskansiot ovat "full-videos" ja "clips".', font=('Arial', 11), height = 1)
 folder_tips_label.grid(row=4, column=1, sticky="w", padx=20)
 
 # Content section 2: clips text
-clips_label = tk.Label(timestamps_frame, text="Tee klippi", font=('Arial', 15), height = 1)
+clips_label = tk.Label(timestamps_frame, text="Leikkaa klippi", font=('Arial', 15), height = 1)
 clips_label.grid(row=0, column=0, sticky="e")
 
 # Clip section 2: clip start timestamp fields
@@ -290,7 +290,7 @@ keep_original_checkbutton = tk.Checkbutton(timestamps_frame, text="Poista alkupe
 keep_original_checkbutton.grid(row=3, column=1, sticky="ew", padx=15)
 
 # Button to update yt-dlp
-ytdlp_update_button = tk.Button(buttons_frame, text="Update yt-dlp", font=('Arial', 13), command=update_ytdlp, height = 1, width = 13)
+ytdlp_update_button = tk.Button(buttons_frame, text="Päivitä yt-dlp", font=('Arial', 13), command=update_ytdlp, height = 1, width = 13)
 ytdlp_update_button.grid(row=0, column=0, sticky="e", padx=30, pady=30)
 
 # Status text for guiding user
@@ -298,14 +298,14 @@ status_label = tk.Label(buttons_frame, textvariable=status_text, font=('Arial', 
 status_label.grid(row=0, column=1, sticky="w")
 
 # Button to start download
-start_button = tk.Button(buttons_frame, text="Start Download", font=('Arial', 15), command=lambda: th.Thread(target=start_download).start(), height = 1, width = 15)
+start_button = tk.Button(buttons_frame, text="Aloita lataus", font=('Arial', 15), command=lambda: th.Thread(target=start_download).start(), height = 1, width = 15)
 start_button.grid(row=0, column=2, sticky="e", padx=30, pady=30)
 
 # Note about required field
-required_label = tk.Label(notes_frame, text="* = Required field", font=('Arial', 11), wraplength=300, width=30, anchor="w")
+required_label = tk.Label(notes_frame, text="* = Pakollinen kenttä", font=('Arial', 11), wraplength=300, width=30, anchor="w")
 required_label.grid(row=5, column=0, sticky="w", padx=25)
 
-version_label = tk.Label(notes_frame, text="Version 1.1", font=('Arial', 11), wraplength=300, width=30, anchor="e")
+version_label = tk.Label(notes_frame, text="Versio 1.1", font=('Arial', 11), wraplength=300, width=30, anchor="e")
 version_label.grid(row=5, column=1, sticky="e", padx=25)
 
 # Start process
