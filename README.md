@@ -20,9 +20,15 @@ Launch program by double clicking Tilhi.
 
 ## How to use
 
-Only required field is url address. There are also option for audio track only and making a clip.
+Only required input field is the url address of the video page you want to download from. Videos are downloaded in webm file format.
 
-If you want to make multiple clips of the same video, wait until the download is finished and add new timestamps while the same url is in the field. This will not download the video multiple times, it will only create a clip if the same video is found in the folder.
+You can also make a clip by filling timestamp field and it uses HH:MM:SS format. Only ending timestamp is required, starting timestamp starts from 00:00:00 by default. Empty fields are filled with "00".
+
+After making a clip, you can make another one by filling in new timestamps. The same full video will not be downloaded again if the full video is still in the folder, only new clip is created.
+
+If you check the audio-only option, both full video and the clips are downloaded in audio-only format. Audio file format is m4a.
+
+If you check the delete original option, the full version is deleted and only clips are kept.
 
 ## Installing and running project
 
