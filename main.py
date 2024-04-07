@@ -6,6 +6,8 @@ import string
 import random
 import threading as th
 import glob
+import time
+import datetime
 
 def resize_image(event):
     global resized_tk
@@ -41,11 +43,9 @@ def start_download():
         else:
             clip_target_folder = "clips"
 
-        # If folders do not exist yet, create them before downloading
+        # If folder does not exist yet, create it before downloading
         if not os.path.exists(video_target_folder):
             os.makedirs(video_target_folder)
-        if not os.path.exists(clip_target_folder):
-            os.makedirs(clip_target_folder)
 
         # Create yt-dlp command to download the video
         if checkbox_only_audio.get() == "On":
@@ -60,6 +60,10 @@ def start_download():
         # If end timestamp fields have any entries, make a clip. Otherwise only download.
         if timestamp_numbers[3] != "" or timestamp_numbers[4] != "" or timestamp_numbers[5] != "":
             edited_timestamps = []
+
+            # If folder does not exist yet, create it before downloading
+            if not os.path.exists(clip_target_folder):
+                os.makedirs(clip_target_folder)
 
             for i in range(len(timestamp_numbers)):
                 if not timestamp_numbers[i]:
@@ -95,14 +99,17 @@ def start_download():
             file_name = file_name.replace("\\", "")
             file_name = file_name.replace(video_target_folder, "")
 
-            # Create ffmpeg command for cutting a clip
+            ts = time.time()
+            date_string = datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S-%f')
+            date_string = date_string.replace(':', '-')
+
+            # If user wants audio only, replace file extension
             if checkbox_only_audio.get() == "On":
-                file_name = file_name[:-4]
-                file_name += ".m4a"
-                cutter = 'ffmpeg -ss ' + start_timestamp + ' -to ' + end_timestamp + ' -i "' + video_target_folder + "/" + file_name + '" -c copy "' + clip_target_folder + '/' + 'clip - ' + file_name + '"'
+                new_file_name = file_name.replace('.m4a', '')
+                cutter = 'ffmpeg -ss ' + start_timestamp + ' -to ' + end_timestamp + ' -i "' + video_target_folder + "/" + file_name + '" -c copy "' + clip_target_folder + '/' + file_name + " - clip " + date_string + '.m4a"'
             else:
-                cutter = 'ffmpeg -ss ' + start_timestamp + ' -to ' + end_timestamp + ' -i "' + video_target_folder + "/" + file_name + '" -c copy "' + clip_target_folder + '/' + 'clip - ' + file_name + '"'
-                print(cutter)
+                new_file_name = file_name.replace('.webm', '')
+                cutter = 'ffmpeg -ss ' + start_timestamp + ' -to ' + end_timestamp + ' -i "' + video_target_folder + "/" + file_name + '" -c copy "' + clip_target_folder + '/' + file_name + " - clip " + date_string + '.webm"'
             
             # Run the ffmpeg command
             subprocess.run(cutter, shell=True)
@@ -116,6 +123,11 @@ def start_download():
             # Only download video
             subprocess.run(command, shell=True)
 
+            # Get latest file name
+            file_location = video_target_folder + "/*"
+            list_of_files = glob.glob(file_location)
+            file_name = max(list_of_files, key=os.path.getctime)
+
         status_text.set("Download finished: " + file_name)
 
     else:
@@ -128,7 +140,7 @@ def update_ytdlp():
 # Create window, set size and window title
 window = tk.Tk()
 window.title("Tilhi - yt-dlp GUI")
-window.geometry("1000x650")
+window.geometry("950x550")
 window.iconbitmap("res/tilhi-icon.ico")
 
 # Choose one of the three cover images at random
@@ -201,6 +213,12 @@ buttons_frame.columnconfigure(0, weight=1)
 buttons_frame.columnconfigure(1, weight=3)
 buttons_frame.columnconfigure(2, weight=1)
 buttons_frame.rowconfigure(0, weight=1)
+
+# 4th content frame: notes
+notes_frame = tk.Frame(side_frame)
+notes_frame.grid(row=5, column=0, sticky="nsew")
+notes_frame.columnconfigure(0, weight=1)
+notes_frame.columnconfigure(1, weight=1)
 
 ### CONTENT ###
 
@@ -283,8 +301,12 @@ status_label.grid(row=0, column=1, sticky="w")
 start_button = tk.Button(buttons_frame, text="Start Download", font=('Arial', 15), command=lambda: th.Thread(target=start_download).start(), height = 1, width = 15)
 start_button.grid(row=0, column=2, sticky="e", padx=30, pady=30)
 
-required_label = tk.Label(side_frame, text="* = Required field", font=('Arial', 11), wraplength=300, width=30, anchor="w")
-required_label.grid(row=5, column=0, sticky="w", padx=20)
+# Note about required field
+required_label = tk.Label(notes_frame, text="* = Required field", font=('Arial', 11), wraplength=300, width=30, anchor="w")
+required_label.grid(row=5, column=0, sticky="w", padx=25)
+
+version_label = tk.Label(notes_frame, text="Version 1.1", font=('Arial', 11), wraplength=300, width=30, anchor="e")
+version_label.grid(row=5, column=1, sticky="e", padx=25)
 
 # Start process
 window.mainloop()
