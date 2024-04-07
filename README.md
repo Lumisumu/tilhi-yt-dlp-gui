@@ -4,9 +4,11 @@ Tilhi is an easy-to-use graphic use interface for yt-dlp and ffmpeg. Download vi
 
 "Tilhi" is a bird that only shows itself during Autumn, in English it's name is "bohemian waxwing".
 
+Available in English and Finnish.
+
 ## User installation
 
-Download Tilhi.exe from Releases.
+Download the zip from Releases and extract it into folder of your choice.
 
 Download yt-dlp.exe: https://github.com/yt-dlp/yt-dlp/releases
 

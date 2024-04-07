@@ -98,7 +98,7 @@ def start_download():
             # Create ffmpeg command for cutting a clip
             if checkbox_only_audio.get() == "On":
                 file_name = file_name[:-4]
-                file_name += "m4a"
+                file_name += ".m4a"
                 cutter = 'ffmpeg -ss ' + start_timestamp + ' -to ' + end_timestamp + ' -i "' + video_target_folder + "/" + file_name + '" -c copy "' + clip_target_folder + '/' + 'clip - ' + file_name + '"'
             else:
                 cutter = 'ffmpeg -ss ' + start_timestamp + ' -to ' + end_timestamp + ' -i "' + video_target_folder + "/" + file_name + '" -c copy "' + clip_target_folder + '/' + 'clip - ' + file_name + '"'
