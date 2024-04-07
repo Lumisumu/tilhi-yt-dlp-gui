@@ -250,7 +250,7 @@ clip_folder_field = tk.Entry(file_info_frame)
 clip_folder_field.grid(row=3, column=1, sticky="ew", padx=20)
 
 # Content section 1: note about file locations
-folder_tips_label = tk.Label(file_info_frame, text="If save locations are left empty, new folders will be created in exe's folder.", font=('Arial', 11), height = 1)
+folder_tips_label = tk.Label(file_info_frame, text='Default folders are named "full-videos" and "clips".', font=('Arial', 11), height = 1)
 folder_tips_label.grid(row=4, column=1, sticky="w", padx=20)
 
 # Content section 2: clips text
