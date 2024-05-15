@@ -200,18 +200,21 @@ file_info_frame.rowconfigure(4, weight=1)
 
 # Url field
 url_label = tk.Label(file_info_frame, text="Download url:*", font=('Arial', 15), height = 1).grid(row=0, column=0, sticky="e")
-url_field = tk.Entry(file_info_frame).grid(row=0, column=1, sticky="ew", padx=20)
+url_field = tk.Entry(file_info_frame)
+url_field.grid(row=0, column=1, sticky="ew", padx=20)
 
 # Only-audio checkbox
 only_audio_checkbutton = tk.Checkbutton(file_info_frame, text="Download only audio track",  font=('Arial', 13), variable=checkbox_only_audio, onvalue="On", offvalue="Off").grid(row=1, column=1, sticky="w", padx=15)
 
 # Video save location field
 full_video_folder_label = tk.Label(file_info_frame, text="Full video save location:", wraplength=200, font=('Arial', 15), height = 2).grid(row=2, column=0, sticky="e")
-full_video_folder_field = tk.Entry(file_info_frame).grid(row=2, column=1, sticky="ew", padx=20)
+full_video_folder_field = tk.Entry(file_info_frame)
+full_video_folder_field.grid(row=2, column=1, sticky="ew", padx=20)
 
 # Clip save location field
 clip_folder_label = tk.Label(file_info_frame, text="Clip save location:", wraplength=200, font=('Arial', 15), height = 2).grid(row=3, column=0, sticky="e")
-clip_folder_field = tk.Entry(file_info_frame).grid(row=3, column=1, sticky="ew", padx=20)
+clip_folder_field = tk.Entry(file_info_frame)
+clip_folder_field.grid(row=3, column=1, sticky="ew", padx=20)
 
 # File location notes label
 folder_tips_label = tk.Label(file_info_frame, text='Default folders are named "full-videos" and "clips".', font=('Arial', 11), height = 1).grid(row=4, column=1, sticky="w", padx=20)
@@ -238,19 +241,25 @@ clips_label = tk.Label(timestamps_frame, text="Cut a clip", font=('Arial', 15), 
 
 # Clip start timestamp labels and fields
 start_timestamp_label = tk.Label(timestamps_frame, text="Start timestamp:", font=('Arial', 15), height = 1).grid(row=1, column=0, sticky="e")
-start_hours_field = tk.Entry(timestamps_frame, justify="center").grid(row=1, column=1, padx=20)
+start_hours_field = tk.Entry(timestamps_frame, justify="center")
+start_hours_field.grid(row=1, column=1, padx=20)
 start_first_middle_label = tk.Label(timestamps_frame, text=":", font=('Arial', 15), height = 1).grid(row=1, column=2)
-start_minutes_field = tk.Entry(timestamps_frame, justify="center").grid(row=1, column=3, padx=20)
+start_minutes_field = tk.Entry(timestamps_frame, justify="center")
+start_minutes_field.grid(row=1, column=3, padx=20)
 start_second_middle_label = tk.Label(timestamps_frame, text=":", font=('Arial', 15), height = 1).grid(row=1, column=4, sticky="ew")
-start_seconds_field = tk.Entry(timestamps_frame, justify="center").grid(row=1, column=5, padx=20)
+start_seconds_field = tk.Entry(timestamps_frame, justify="center")
+start_seconds_field.grid(row=1, column=5, padx=20)
 
 # Clip end timestamp labels and fields
 end_timestamp_label = tk.Label(timestamps_frame, text="End timestamp:", font=('Arial', 15), height = 1).grid(row=2, column=0, sticky="e")
-end_hours_field = tk.Entry(timestamps_frame, justify="center").grid(row=2, column=1, padx=20)
+end_hours_field = tk.Entry(timestamps_frame, justify="center")
+end_hours_field.grid(row=2, column=1, padx=20)
 end_first_middle_label = tk.Label(timestamps_frame, text=":", font=('Arial', 15), height = 1).grid(row=2, column=2)
-end_minutes_field = tk.Entry(timestamps_frame, justify="center").grid(row=2, column=3, padx=20)
+end_minutes_field = tk.Entry(timestamps_frame, justify="center")
+end_minutes_field.grid(row=2, column=3, padx=20)
 end_second_middle_label = tk.Label(timestamps_frame, text=":", font=('Arial', 15), height = 1).grid(row=2, column=4)
-end_seconds_field = tk.Entry(timestamps_frame, justify="center").grid(row=2, column=5, padx=20)
+end_seconds_field = tk.Entry(timestamps_frame, justify="center")
+end_seconds_field.grid(row=2, column=5, padx=20)
 
 # Keep-original checkbox
 keep_original_checkbutton = tk.Checkbutton(timestamps_frame, text="Delete full video", font=('Arial', 13), variable=checkbox_keep_original, onvalue="On", offvalue="Off").grid(row=3, column=1, sticky="ew", padx=15)
