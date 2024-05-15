@@ -1,4 +1,5 @@
 import tkinter as tk
+from tkinter import ttk
 from PIL import Image, ImageTk
 import os
 import subprocess
@@ -134,13 +135,15 @@ def start_download():
         status_text.set("Error: url field is empty.")
 
 def update_ytdlp():
-    subprocess.run("yt-dlp --update", shell=True)
-    status_text.set("yt-dlp updated.")
+    result = subprocess.run("yt-dlp --update", stdout=subprocess.PIPE, text=True, shell=True)
+    output_lines = result.stdout.split('\n')
+    last_line = next((line for line in reversed(output_lines) if line), "")
+    status_text.set(last_line)
 
 # Create window, set size and window title
 window = tk.Tk()
 window.title("Tilhi - yt-dlp GUI")
-window.geometry("950x550")
+window.geometry("1000x600")
 window.iconbitmap("res/tilhi-icon.ico")
 
 # Choose one of the three cover images at random
@@ -162,14 +165,17 @@ end_timestamp = "00:00:00"
 checkbox_keep_original = tk.StringVar(value="Off")
 checkbox_only_audio = tk.StringVar(value="Off")
 
-### GRIDS ###
-
 # Main grid that slips window into two parts
 window.columnconfigure(0, weight = 3)
 window.columnconfigure(1, weight = 1)
 window.rowconfigure(0, weight = 1)
 
-# Grid that holds the content area
+# Decoration image on the left side of the window
+canvas = tk.Canvas(window, background="red", bd=0, highlightthickness=0, width=40)
+canvas.grid(row=0, column=0, sticky="nsew")
+canvas.bind("<Configure>", resize_image)
+
+# Grid for widgets on the right side of the window
 side_frame = tk.Frame(window)
 side_frame.grid(row=0, column=1, sticky="nsew")
 side_frame.columnconfigure(0, weight=1)
@@ -180,7 +186,7 @@ side_frame.rowconfigure(3, weight=1)
 side_frame.rowconfigure(4, weight=1)
 side_frame.rowconfigure(5, weight=1)
 
-# 1st content frame: file settings
+# Grid for file settings
 file_info_frame = tk.Frame(side_frame)
 file_info_frame.grid(row=1, column=0, sticky="nsew")
 file_info_frame.columnconfigure(0, weight=1)
@@ -192,7 +198,28 @@ file_info_frame.rowconfigure(2, weight=3)
 file_info_frame.rowconfigure(3, weight=1)
 file_info_frame.rowconfigure(4, weight=1)
 
-# 2nd content frame: timestamps
+# Url field
+url_label = tk.Label(file_info_frame, text="Download url:*", font=('Arial', 15), height = 1).grid(row=0, column=0, sticky="e")
+url_field = tk.Entry(file_info_frame).grid(row=0, column=1, sticky="ew", padx=20)
+
+# Only-audio checkbox
+only_audio_checkbutton = tk.Checkbutton(file_info_frame, text="Download only audio track",  font=('Arial', 13), variable=checkbox_only_audio, onvalue="On", offvalue="Off").grid(row=1, column=1, sticky="w", padx=15)
+
+# Video save location field
+full_video_folder_label = tk.Label(file_info_frame, text="Full video save location:", wraplength=200, font=('Arial', 15), height = 2).grid(row=2, column=0, sticky="e")
+full_video_folder_field = tk.Entry(file_info_frame).grid(row=2, column=1, sticky="ew", padx=20)
+
+# Clip save location field
+clip_folder_label = tk.Label(file_info_frame, text="Clip save location:", wraplength=200, font=('Arial', 15), height = 2).grid(row=3, column=0, sticky="e")
+clip_folder_field = tk.Entry(file_info_frame).grid(row=3, column=1, sticky="ew", padx=20)
+
+# File location notes label
+folder_tips_label = tk.Label(file_info_frame, text='Default folders are named "full-videos" and "clips".', font=('Arial', 11), height = 1).grid(row=4, column=1, sticky="w", padx=20)
+
+# Separator
+separator1 = ttk.Separator(side_frame, orient="horizontal").grid(row=2, column=0, columnspan=1, sticky="news", padx=30, pady=20)
+
+# Grid for timestamps
 timestamps_frame = tk.Frame(side_frame)
 timestamps_frame.grid(row=3, column=0, sticky="nsew")
 timestamps_frame.columnconfigure(0, weight=1)
@@ -206,107 +233,59 @@ timestamps_frame.rowconfigure(1, weight=1)
 timestamps_frame.rowconfigure(2, weight=1)
 timestamps_frame.rowconfigure(3, weight=1)
 
-# 3rd content frame: buttons
+# Clips title label
+clips_label = tk.Label(timestamps_frame, text="Cut a clip", font=('Arial', 15), height = 1).grid(row=0, column=0, sticky="e")
+
+# Clip start timestamp labels and fields
+start_timestamp_label = tk.Label(timestamps_frame, text="Start timestamp:", font=('Arial', 15), height = 1).grid(row=1, column=0, sticky="e")
+start_hours_field = tk.Entry(timestamps_frame, justify="center").grid(row=1, column=1, padx=20)
+start_first_middle_label = tk.Label(timestamps_frame, text=":", font=('Arial', 15), height = 1).grid(row=1, column=2)
+start_minutes_field = tk.Entry(timestamps_frame, justify="center").grid(row=1, column=3, padx=20)
+start_second_middle_label = tk.Label(timestamps_frame, text=":", font=('Arial', 15), height = 1).grid(row=1, column=4, sticky="ew")
+start_seconds_field = tk.Entry(timestamps_frame, justify="center").grid(row=1, column=5, padx=20)
+
+# Clip end timestamp labels and fields
+end_timestamp_label = tk.Label(timestamps_frame, text="End timestamp:", font=('Arial', 15), height = 1).grid(row=2, column=0, sticky="e")
+end_hours_field = tk.Entry(timestamps_frame, justify="center").grid(row=2, column=1, padx=20)
+end_first_middle_label = tk.Label(timestamps_frame, text=":", font=('Arial', 15), height = 1).grid(row=2, column=2)
+end_minutes_field = tk.Entry(timestamps_frame, justify="center").grid(row=2, column=3, padx=20)
+end_second_middle_label = tk.Label(timestamps_frame, text=":", font=('Arial', 15), height = 1).grid(row=2, column=4)
+end_seconds_field = tk.Entry(timestamps_frame, justify="center").grid(row=2, column=5, padx=20)
+
+# Keep-original checkbox
+keep_original_checkbutton = tk.Checkbutton(timestamps_frame, text="Delete full video", font=('Arial', 13), variable=checkbox_keep_original, onvalue="On", offvalue="Off").grid(row=3, column=1, sticky="ew", padx=15)
+
+# Separator
+separator2 = ttk.Separator(side_frame, orient="horizontal").grid(row=4, column=0, columnspan=1, sticky="news", padx=30, pady=20)
+
+# Grid for buttons
 buttons_frame = tk.Frame(side_frame)
-buttons_frame.grid(row=4, column=0, sticky="nsew")
+buttons_frame.grid(row=5, column=0, sticky="nsew")
 buttons_frame.columnconfigure(0, weight=1)
 buttons_frame.columnconfigure(1, weight=3)
 buttons_frame.columnconfigure(2, weight=1)
 buttons_frame.rowconfigure(0, weight=1)
 
-# 4th content frame: notes
+# Button to update yt-dlp
+ytdlp_update_button = tk.Button(buttons_frame, text="Update yt-dlp", font=('Arial', 13), command=update_ytdlp, height = 1, width = 13).grid(row=0, column=0, sticky="e", padx=30, pady=10)
+
+# Status text for guiding user
+status_label = tk.Label(buttons_frame, textvariable=status_text, font=('Arial', 13), wraplength=300, width=30, anchor="w").grid(row=0, column=1, sticky="w")
+
+# Button to start download
+start_button = tk.Button(buttons_frame, text="Start Download", font=('Arial', 15), command=lambda: th.Thread(target=start_download).start(), height = 1, width = 15).grid(row=0, column=2, sticky="e", padx=30, pady=10)
+
+# Grid for notes
 notes_frame = tk.Frame(side_frame)
-notes_frame.grid(row=5, column=0, sticky="nsew")
+notes_frame.grid(row=6, column=0, sticky="nsew")
 notes_frame.columnconfigure(0, weight=1)
 notes_frame.columnconfigure(1, weight=1)
 
-### CONTENT ###
+# Required fields label
+required_label = tk.Label(notes_frame, text="* = Required field", font=('Arial', 11), wraplength=300, width=30, anchor="w").grid(row=5, column=0, sticky="w", padx=25, pady=5)
 
-# Content, left side: decoration image
-canvas = tk.Canvas(window, background="red", bd=0, highlightthickness=0, width=40)
-canvas.grid(row=0, column=0, sticky="nsew")
-canvas.bind("<Configure>", resize_image)
-
-# Content section 1: download url field
-url_label = tk.Label(file_info_frame, text="Download url:*", font=('Arial', 15), height = 1)
-url_label.grid(row=0, column=0, sticky="e")
-url_field = tk.Entry(file_info_frame)
-url_field.grid(row=0, column=1, sticky="ew", padx=20)
-
-# Content section 1: only audio
-only_audio_checkbutton = tk.Checkbutton(file_info_frame, text="Download only audio track",  font=('Arial', 13), variable=checkbox_only_audio, onvalue="On", offvalue="Off")
-only_audio_checkbutton.grid(row=1, column=1, sticky="w", padx=15)
-
-# Content section 1: full video folder selection field
-full_video_folder_label = tk.Label(file_info_frame, text="Full video save location:", wraplength=200, font=('Arial', 15), height = 2)
-full_video_folder_label.grid(row=2, column=0, sticky="e")
-full_video_folder_field = tk.Entry(file_info_frame)
-full_video_folder_field.grid(row=2, column=1, sticky="ew", padx=20)
-
-# Content section 1: clip folder selection field
-clip_folder_label = tk.Label(file_info_frame, text="Clip save location:", wraplength=200, font=('Arial', 15), height = 2)
-clip_folder_label.grid(row=3, column=0, sticky="e")
-clip_folder_field = tk.Entry(file_info_frame)
-clip_folder_field.grid(row=3, column=1, sticky="ew", padx=20)
-
-# Content section 1: note about file locations
-folder_tips_label = tk.Label(file_info_frame, text='Default folders are named "full-videos" and "clips".', font=('Arial', 11), height = 1)
-folder_tips_label.grid(row=4, column=1, sticky="w", padx=20)
-
-# Content section 2: clips text
-clips_label = tk.Label(timestamps_frame, text="Cut a clip", font=('Arial', 15), height = 1)
-clips_label.grid(row=0, column=0, sticky="e")
-
-# Clip section 2: clip start timestamp fields
-start_timestamp_label = tk.Label(timestamps_frame, text="Start timestamp:", font=('Arial', 15), height = 1)
-start_timestamp_label.grid(row=1, column=0, sticky="e")
-start_hours_field = tk.Entry(timestamps_frame, justify="center")
-start_hours_field.grid(row=1, column=1, padx=20)
-start_first_middle_label = tk.Label(timestamps_frame, text=":", font=('Arial', 15), height = 1)
-start_first_middle_label.grid(row=1, column=2)
-start_minutes_field = tk.Entry(timestamps_frame, justify="center")
-start_minutes_field.grid(row=1, column=3, padx=20)
-start_second_middle_label = tk.Label(timestamps_frame, text=":", font=('Arial', 15), height = 1)
-start_second_middle_label.grid(row=1, column=4, sticky="ew")
-start_seconds_field = tk.Entry(timestamps_frame, justify="center")
-start_seconds_field.grid(row=1, column=5, padx=20)
-
-# Clip section 2: clip end timestamp fields
-end_timestamp_label = tk.Label(timestamps_frame, text="End timestamp:", font=('Arial', 15), height = 1)
-end_timestamp_label.grid(row=2, column=0, sticky="e")
-end_hours_field = tk.Entry(timestamps_frame, justify="center")
-end_hours_field.grid(row=2, column=1, padx=20)
-end_first_middle_label = tk.Label(timestamps_frame, text=":", font=('Arial', 15), height = 1)
-end_first_middle_label.grid(row=2, column=2)
-end_minutes_field = tk.Entry(timestamps_frame, justify="center")
-end_minutes_field.grid(row=2, column=3, padx=20)
-end_second_middle_label = tk.Label(timestamps_frame, text=":", font=('Arial', 15), height = 1)
-end_second_middle_label.grid(row=2, column=4)
-end_seconds_field = tk.Entry(timestamps_frame, justify="center")
-end_seconds_field.grid(row=2, column=5, padx=20)
-
-# Clip section 2: keep original video
-keep_original_checkbutton = tk.Checkbutton(timestamps_frame, text="Delete full video", font=('Arial', 13), variable=checkbox_keep_original, onvalue="On", offvalue="Off")
-keep_original_checkbutton.grid(row=3, column=1, sticky="ew", padx=15)
-
-# Button to update yt-dlp
-ytdlp_update_button = tk.Button(buttons_frame, text="Update yt-dlp", font=('Arial', 13), command=update_ytdlp, height = 1, width = 13)
-ytdlp_update_button.grid(row=0, column=0, sticky="e", padx=30, pady=30)
-
-# Status text for guiding user
-status_label = tk.Label(buttons_frame, textvariable=status_text, font=('Arial', 13), wraplength=300, width=30, anchor="w")
-status_label.grid(row=0, column=1, sticky="w")
-
-# Button to start download
-start_button = tk.Button(buttons_frame, text="Start Download", font=('Arial', 15), command=lambda: th.Thread(target=start_download).start(), height = 1, width = 15)
-start_button.grid(row=0, column=2, sticky="e", padx=30, pady=30)
-
-# Note about required field
-required_label = tk.Label(notes_frame, text="* = Required field", font=('Arial', 11), wraplength=300, width=30, anchor="w")
-required_label.grid(row=5, column=0, sticky="w", padx=25)
-
-version_label = tk.Label(notes_frame, text="Version 1.1", font=('Arial', 11), wraplength=300, width=30, anchor="e")
-version_label.grid(row=5, column=1, sticky="e", padx=25)
+# Version number label
+version_label = tk.Label(notes_frame, text="Version 1.1", font=('Arial', 11), wraplength=300, width=30, anchor="e").grid(row=5, column=1, sticky="e", padx=25, pady=5)
 
 # Start process
 window.mainloop()
