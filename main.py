@@ -10,6 +10,14 @@ import glob
 import time
 import datetime
 
+def show_message(message: str):
+    status_text.set(message)
+
+def update_ytdlp():
+    result = subprocess.run("yt-dlp --update", stdout=subprocess.PIPE, text=True, shell=True)
+    output_lines = result.stdout.split('\n')
+    show_message(next((line for line in reversed(output_lines) if line), ""))
+
 def resize_image(event):
     global resized_tk
 
@@ -57,6 +65,8 @@ def start_download():
         # Arrays for timestamp editing
         timestamp_numbers = []
         timestamp_numbers.extend([start_hours_field.get(), start_minutes_field.get(), start_seconds_field.get(), end_hours_field.get(), end_minutes_field.get(), end_seconds_field.get()])
+
+        show_message("Downloading...")
 
         # If end timestamp fields have any entries, make a clip. Otherwise only download.
         if timestamp_numbers[3] != "" or timestamp_numbers[4] != "" or timestamp_numbers[5] != "":
@@ -129,16 +139,10 @@ def start_download():
             list_of_files = glob.glob(file_location)
             file_name = max(list_of_files, key=os.path.getctime)
 
-        status_text.set("Download finished: " + file_name)
+        show_message("Download finished: " + file_name)
 
     else:
-        status_text.set("Error: url field is empty.")
-
-def update_ytdlp():
-    result = subprocess.run("yt-dlp --update", stdout=subprocess.PIPE, text=True, shell=True)
-    output_lines = result.stdout.split('\n')
-    last_line = next((line for line in reversed(output_lines) if line), "")
-    status_text.set(last_line)
+        show_message("Error: Url field is empty.")
 
 # Create window, set size and window title
 window = tk.Tk()
@@ -155,7 +159,7 @@ image_tk = ImageTk.PhotoImage(image_original)
 
 # Status text variable
 status_text = tk.StringVar()
-status_text.set("Input url and press Start to download.")
+show_message("Input video url and press Start to download.")
 
 # User selections
 video_target_folder = "full-videos"
@@ -166,7 +170,7 @@ checkbox_keep_original = tk.StringVar(value="Off")
 checkbox_only_audio = tk.StringVar(value="Off")
 
 # Main grid that slips window into two parts
-window.columnconfigure(0, weight = 3)
+window.columnconfigure(0, weight = 10)
 window.columnconfigure(1, weight = 1)
 window.rowconfigure(0, weight = 1)
 
@@ -217,7 +221,7 @@ clip_folder_field = tk.Entry(file_info_frame)
 clip_folder_field.grid(row=3, column=1, sticky="ew", padx=20)
 
 # File location notes label
-folder_tips_label = tk.Label(file_info_frame, text='Default folders are named "full-videos" and "clips".', font=('Arial', 11), height = 1).grid(row=4, column=1, sticky="w", padx=20)
+folder_tips_label = tk.Label(file_info_frame, text='Default folder names are "full-videos" and "clips".', font=('Arial', 11), height = 1).grid(row=4, column=1, sticky="w", padx=20)
 
 # Separator
 separator1 = ttk.Separator(side_frame, orient="horizontal").grid(row=2, column=0, columnspan=1, sticky="news", padx=30, pady=20)
@@ -276,13 +280,13 @@ buttons_frame.columnconfigure(2, weight=1)
 buttons_frame.rowconfigure(0, weight=1)
 
 # Button to update yt-dlp
-ytdlp_update_button = tk.Button(buttons_frame, text="Update yt-dlp", font=('Arial', 13), command=update_ytdlp, height = 1, width = 13).grid(row=0, column=0, sticky="e", padx=30, pady=10)
+ytdlp_update_button = tk.Button(buttons_frame, text="Update yt-dlp", font=('Arial', 13), command=lambda: th.Thread(target=update_ytdlp).start(), height = 1, width = 13).grid(row=0, column=0, sticky="e", padx=20, pady=10)
 
 # Status text for guiding user
-status_label = tk.Label(buttons_frame, textvariable=status_text, font=('Arial', 13), wraplength=300, width=30, anchor="w").grid(row=0, column=1, sticky="w")
+status_label = tk.Label(buttons_frame, textvariable=status_text, font=('Arial', 13), wraplength=300, width=40, anchor="w").grid(row=0, column=1, padx=20, sticky="w")
 
 # Button to start download
-start_button = tk.Button(buttons_frame, text="Start Download", font=('Arial', 15), command=lambda: th.Thread(target=start_download).start(), height = 1, width = 15).grid(row=0, column=2, sticky="e", padx=30, pady=10)
+start_button = tk.Button(buttons_frame, text="Start", font=('Arial', 15), command=lambda: th.Thread(target=start_download).start(), height = 1, width = 15).grid(row=0, column=2, sticky="ew", padx=30, pady=10)
 
 # Grid for notes
 notes_frame = tk.Frame(side_frame)
