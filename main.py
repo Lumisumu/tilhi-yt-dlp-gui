@@ -176,7 +176,7 @@ def start_download():
 
 # Create window, set size and window title
 window = tk.Tk()
-window.title("Tilhi - yt-dlp GUI")
+window.title("Tilhi yt-dlp GUI 1.1")
 window.geometry("1000x600")
 window.iconbitmap("res/tilhi-icon.ico")
 
@@ -233,7 +233,7 @@ file_info_frame.rowconfigure(3, weight=1)
 file_info_frame.rowconfigure(4, weight=1)
 
 # Url field
-url_label = tk.Label(file_info_frame, text="Download url:*", font=('Arial', 15), height = 1).grid(row=0, column=0, sticky="e")
+url_label = tk.Label(file_info_frame, text="Video url:", font=('Arial', 15), height = 1).grid(row=0, column=0, sticky="e")
 url_field = tk.Entry(file_info_frame, font=('Arial', 10), width=70)
 url_field.grid(row=0, column=1, sticky="w", padx=20)
 url_field.bind("<Button-3>", context_menu)
@@ -262,12 +262,13 @@ separator1 = ttk.Separator(side_frame, orient="horizontal").grid(row=2, column=0
 # Grid for timestamps
 timestamps_frame = tk.Frame(side_frame)
 timestamps_frame.grid(row=3, column=0, sticky="nsew")
-timestamps_frame.columnconfigure(0, weight=1)
+timestamps_frame.columnconfigure(0, weight=3)
 timestamps_frame.columnconfigure(1, weight=1)
 timestamps_frame.columnconfigure(2, weight=1)
 timestamps_frame.columnconfigure(3, weight=1)
 timestamps_frame.columnconfigure(4, weight=1)
 timestamps_frame.columnconfigure(5, weight=1)
+timestamps_frame.columnconfigure(6, weight=3)
 timestamps_frame.rowconfigure(0, weight=3)
 timestamps_frame.rowconfigure(1, weight=1)
 timestamps_frame.rowconfigure(2, weight=1)
@@ -316,7 +317,7 @@ separator2 = ttk.Separator(side_frame, orient="horizontal").grid(row=4, column=0
 
 # Grid for buttons
 buttons_frame = tk.Frame(side_frame)
-buttons_frame.grid(row=5, column=0, sticky="nsew")
+buttons_frame.grid(row=5, column=0, sticky="news")
 buttons_frame.columnconfigure(0, weight=1)
 buttons_frame.columnconfigure(1, weight=3)
 buttons_frame.columnconfigure(2, weight=3)
@@ -324,29 +325,17 @@ buttons_frame.columnconfigure(3, weight=1)
 buttons_frame.rowconfigure(0, weight=1)
 
 # Button to update yt-dlp
-ytdlp_update_button = tk.Button(buttons_frame, text="Update yt-dlp", font=('Arial', 13), command=lambda: th.Thread(target=update_ytdlp).start(), height = 1, width = 13).grid(row=0, column=0, sticky="e", padx=10, pady=10)
+ytdlp_update_button = tk.Button(buttons_frame, text="Update yt-dlp", font=('Arial', 13), command=lambda: th.Thread(target=update_ytdlp).start(), height = 1, width = 10).grid(row=0, column=0, sticky="ne", padx=20, pady=10)
 
 # Button to clear fields
-clear_fields_button = tk.Button(buttons_frame, text="Clear fields", font=('Arial', 13), command=clear_fields, height = 1, width = 13).grid(row=0, column=1, sticky="e", padx=10, pady=10)
+clear_fields_button = tk.Button(buttons_frame, text="Clear fields", font=('Arial', 13), command=clear_fields, height = 1, width = 10).grid(row=0, column=1, sticky="ne", padx=0, pady=10)
 
 # Status text for guiding user
 status_label = tk.Label(buttons_frame, textvariable=status_text, font=('Arial', 13), wraplength=300, width=35, fg="black")
-status_label.grid(row=0, column=2, padx=10, sticky="ew")
+status_label.grid(row=0, column=2, padx=0, sticky="new")
 
 # Button to start download
-start_button = tk.Button(buttons_frame, text="Start", font=('Arial', 15), command=lambda: th.Thread(target=start_download).start(), height = 1, width = 15).grid(row=0, column=3, sticky="ew", padx=10, pady=10)
-
-# Grid for notes
-notes_frame = tk.Frame(side_frame)
-notes_frame.grid(row=6, column=0, sticky="nsew")
-notes_frame.columnconfigure(0, weight=1)
-notes_frame.columnconfigure(1, weight=1)
-
-# Required fields label
-required_label = tk.Label(notes_frame, text="* = Required field", font=('Arial', 11), wraplength=300, width=30, anchor="w").grid(row=5, column=0, sticky="w", padx=25, pady=5)
-
-# Version number label
-version_label = tk.Label(notes_frame, text="Version 1.1", font=('Arial', 11), wraplength=300, width=30, anchor="e").grid(row=5, column=1, sticky="e", padx=25, pady=5)
+start_button = tk.Button(buttons_frame, text="Start", font=('Arial', 15), command=lambda: th.Thread(target=start_download).start(), height = 1, width = 15, bg="lightgreen").grid(row=0, column=3, sticky="nw", padx=20, pady=10)
 
 # Start process
 window.mainloop()
