@@ -10,13 +10,43 @@ import glob
 import time
 import datetime
 
-def show_message(message: str):
+# Show tips
+def show_message(message: str, color: str):
     status_text.set(message)
+    status_label.configure(fg=color)
 
 def update_ytdlp():
     result = subprocess.run("yt-dlp --update", stdout=subprocess.PIPE, text=True, shell=True)
     output_lines = result.stdout.split('\n')
-    show_message(next((line for line in reversed(output_lines) if line), ""))
+    show_message(next((line for line in reversed(output_lines) if line), ""), "black")
+
+# Reset all fields and checkbuttons
+def clear_fields():
+    url_field.delete(0, 'end')
+    full_video_folder_field.delete(0, 'end')
+    clip_folder_field.delete(0, 'end')
+    start_hours_field.delete(0, 'end')
+    start_minutes_field.delete(0, 'end')
+    start_seconds_field.delete(0, 'end')
+    end_hours_field.delete(0, 'end')
+    end_minutes_field.delete(0, 'end')
+    end_seconds_field.delete(0, 'end')
+    checkbox_keep_original.set(0)
+    checkbox_only_audio.set(0)
+
+# Open context menu when user right-clicks on fields
+class context_menu:
+    def __init__(self, e):
+        options = ["Paste", "Copy", "Cut"]
+        dropdown = tk.Menu(None, tearoff=0, takefocus=0)
+
+        for txt in options:
+            dropdown.add_command(label=txt, command=lambda e=e,txt=txt:self.select_option(e,txt))
+
+        dropdown.tk_popup(e.x_root + 00, e.y_root + 5, entry="0")
+
+    def select_option(self, e, cmd):
+        e.widget.event_generate(f'<<{cmd}>>')
 
 def resize_image(event):
     global resized_tk
@@ -66,7 +96,7 @@ def start_download():
         timestamp_numbers = []
         timestamp_numbers.extend([start_hours_field.get(), start_minutes_field.get(), start_seconds_field.get(), end_hours_field.get(), end_minutes_field.get(), end_seconds_field.get()])
 
-        show_message("Downloading...")
+        show_message("Downloading...", "black")
 
         # If end timestamp fields have any entries, make a clip. Otherwise only download.
         if timestamp_numbers[3] != "" or timestamp_numbers[4] != "" or timestamp_numbers[5] != "":
@@ -139,10 +169,10 @@ def start_download():
             list_of_files = glob.glob(file_location)
             file_name = max(list_of_files, key=os.path.getctime)
 
-        show_message("Download finished: " + file_name)
+        show_message(str("Download finished: " + file_name), "green")
 
     else:
-        show_message("Error: Url field is empty.")
+        show_message("Error: Url field is empty.", "black")
 
 # Create window, set size and window title
 window = tk.Tk()
@@ -159,7 +189,7 @@ image_tk = ImageTk.PhotoImage(image_original)
 
 # Status text variable
 status_text = tk.StringVar()
-show_message("Input video url and press Start to download.")
+status_text.set("Input video url and press Start to download.")
 
 # User selections
 video_target_folder = "full-videos"
@@ -204,21 +234,24 @@ file_info_frame.rowconfigure(4, weight=1)
 
 # Url field
 url_label = tk.Label(file_info_frame, text="Download url:*", font=('Arial', 15), height = 1).grid(row=0, column=0, sticky="e")
-url_field = tk.Entry(file_info_frame)
-url_field.grid(row=0, column=1, sticky="ew", padx=20)
+url_field = tk.Entry(file_info_frame, font=('Arial', 10), width=70)
+url_field.grid(row=0, column=1, sticky="w", padx=20)
+url_field.bind("<Button-3>", context_menu)
 
 # Only-audio checkbox
 only_audio_checkbutton = tk.Checkbutton(file_info_frame, text="Download only audio track",  font=('Arial', 13), variable=checkbox_only_audio, onvalue="On", offvalue="Off").grid(row=1, column=1, sticky="w", padx=15)
 
 # Video save location field
 full_video_folder_label = tk.Label(file_info_frame, text="Full video save location:", wraplength=200, font=('Arial', 15), height = 2).grid(row=2, column=0, sticky="e")
-full_video_folder_field = tk.Entry(file_info_frame)
-full_video_folder_field.grid(row=2, column=1, sticky="ew", padx=20)
+full_video_folder_field = tk.Entry(file_info_frame, font=('Arial', 10), width=70)
+full_video_folder_field.grid(row=2, column=1, sticky="w", padx=20)
+full_video_folder_field.bind("<Button-3>", context_menu)
 
 # Clip save location field
 clip_folder_label = tk.Label(file_info_frame, text="Clip save location:", wraplength=200, font=('Arial', 15), height = 2).grid(row=3, column=0, sticky="e")
-clip_folder_field = tk.Entry(file_info_frame)
-clip_folder_field.grid(row=3, column=1, sticky="ew", padx=20)
+clip_folder_field = tk.Entry(file_info_frame, font=('Arial', 10), width=70)
+clip_folder_field.grid(row=3, column=1, sticky="w", padx=20)
+clip_folder_field.bind("<Button-3>", context_menu)
 
 # File location notes label
 folder_tips_label = tk.Label(file_info_frame, text='Default folder names are "full-videos" and "clips".', font=('Arial', 11), height = 1).grid(row=4, column=1, sticky="w", padx=20)
@@ -245,25 +278,35 @@ clips_label = tk.Label(timestamps_frame, text="Cut a clip", font=('Arial', 15), 
 
 # Clip start timestamp labels and fields
 start_timestamp_label = tk.Label(timestamps_frame, text="Start timestamp:", font=('Arial', 15), height = 1).grid(row=1, column=0, sticky="e")
-start_hours_field = tk.Entry(timestamps_frame, justify="center")
+start_hours_field = tk.Entry(timestamps_frame, justify="center", font=('Arial', 15), width=6)
 start_hours_field.grid(row=1, column=1, padx=20)
+start_hours_field.bind("<Button-3>", context_menu)
+
 start_first_middle_label = tk.Label(timestamps_frame, text=":", font=('Arial', 15), height = 1).grid(row=1, column=2)
-start_minutes_field = tk.Entry(timestamps_frame, justify="center")
+start_minutes_field = tk.Entry(timestamps_frame, justify="center", font=('Arial', 15), width=6)
 start_minutes_field.grid(row=1, column=3, padx=20)
+start_minutes_field.bind("<Button-3>", context_menu)
+
 start_second_middle_label = tk.Label(timestamps_frame, text=":", font=('Arial', 15), height = 1).grid(row=1, column=4, sticky="ew")
-start_seconds_field = tk.Entry(timestamps_frame, justify="center")
+start_seconds_field = tk.Entry(timestamps_frame, justify="center", font=('Arial', 15), width=6)
 start_seconds_field.grid(row=1, column=5, padx=20)
+start_seconds_field.bind("<Button-3>", context_menu)
 
 # Clip end timestamp labels and fields
 end_timestamp_label = tk.Label(timestamps_frame, text="End timestamp:", font=('Arial', 15), height = 1).grid(row=2, column=0, sticky="e")
-end_hours_field = tk.Entry(timestamps_frame, justify="center")
+end_hours_field = tk.Entry(timestamps_frame, justify="center", font=('Arial', 15), width=6)
 end_hours_field.grid(row=2, column=1, padx=20)
+end_hours_field.bind("<Button-3>", context_menu)
+
 end_first_middle_label = tk.Label(timestamps_frame, text=":", font=('Arial', 15), height = 1).grid(row=2, column=2)
-end_minutes_field = tk.Entry(timestamps_frame, justify="center")
+end_minutes_field = tk.Entry(timestamps_frame, justify="center", font=('Arial', 15), width=6)
 end_minutes_field.grid(row=2, column=3, padx=20)
+end_minutes_field.bind("<Button-3>", context_menu)
+
 end_second_middle_label = tk.Label(timestamps_frame, text=":", font=('Arial', 15), height = 1).grid(row=2, column=4)
-end_seconds_field = tk.Entry(timestamps_frame, justify="center")
+end_seconds_field = tk.Entry(timestamps_frame, justify="center", font=('Arial', 15), width=6)
 end_seconds_field.grid(row=2, column=5, padx=20)
+end_seconds_field.bind("<Button-3>", context_menu)
 
 # Keep-original checkbox
 keep_original_checkbutton = tk.Checkbutton(timestamps_frame, text="Delete full video", font=('Arial', 13), variable=checkbox_keep_original, onvalue="On", offvalue="Off").grid(row=3, column=1, sticky="ew", padx=15)
@@ -276,17 +319,22 @@ buttons_frame = tk.Frame(side_frame)
 buttons_frame.grid(row=5, column=0, sticky="nsew")
 buttons_frame.columnconfigure(0, weight=1)
 buttons_frame.columnconfigure(1, weight=3)
-buttons_frame.columnconfigure(2, weight=1)
+buttons_frame.columnconfigure(2, weight=3)
+buttons_frame.columnconfigure(3, weight=1)
 buttons_frame.rowconfigure(0, weight=1)
 
 # Button to update yt-dlp
-ytdlp_update_button = tk.Button(buttons_frame, text="Update yt-dlp", font=('Arial', 13), command=lambda: th.Thread(target=update_ytdlp).start(), height = 1, width = 13).grid(row=0, column=0, sticky="e", padx=20, pady=10)
+ytdlp_update_button = tk.Button(buttons_frame, text="Update yt-dlp", font=('Arial', 13), command=lambda: th.Thread(target=update_ytdlp).start(), height = 1, width = 13).grid(row=0, column=0, sticky="e", padx=10, pady=10)
+
+# Button to clear fields
+clear_fields_button = tk.Button(buttons_frame, text="Clear fields", font=('Arial', 13), command=clear_fields, height = 1, width = 13).grid(row=0, column=1, sticky="e", padx=10, pady=10)
 
 # Status text for guiding user
-status_label = tk.Label(buttons_frame, textvariable=status_text, font=('Arial', 13), wraplength=300, width=40, anchor="w").grid(row=0, column=1, padx=20, sticky="w")
+status_label = tk.Label(buttons_frame, textvariable=status_text, font=('Arial', 13), wraplength=300, width=35, fg="black")
+status_label.grid(row=0, column=2, padx=10, sticky="ew")
 
 # Button to start download
-start_button = tk.Button(buttons_frame, text="Start", font=('Arial', 15), command=lambda: th.Thread(target=start_download).start(), height = 1, width = 15).grid(row=0, column=2, sticky="ew", padx=30, pady=10)
+start_button = tk.Button(buttons_frame, text="Start", font=('Arial', 15), command=lambda: th.Thread(target=start_download).start(), height = 1, width = 15).grid(row=0, column=3, sticky="ew", padx=10, pady=10)
 
 # Grid for notes
 notes_frame = tk.Frame(side_frame)
