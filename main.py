@@ -325,10 +325,10 @@ buttons_frame.columnconfigure(3, weight=1)
 buttons_frame.rowconfigure(0, weight=1)
 
 # Button to update yt-dlp
-ytdlp_update_button = tk.Button(buttons_frame, text="Update yt-dlp", font=('Arial', 13), command=lambda: th.Thread(target=update_ytdlp).start(), height = 1, width = 10).grid(row=0, column=0, sticky="ne", padx=20, pady=10)
+ytdlp_update_button = tk.Button(buttons_frame, text="Update yt-dlp", font=('Arial', 12), command=lambda: th.Thread(target=update_ytdlp).start(), height = 1, width = 10).grid(row=0, column=0, sticky="ne", padx=20, pady=10)
 
 # Button to clear fields
-clear_fields_button = tk.Button(buttons_frame, text="Clear fields", font=('Arial', 13), command=clear_fields, height = 1, width = 10).grid(row=0, column=1, sticky="ne", padx=0, pady=10)
+clear_fields_button = tk.Button(buttons_frame, text="Clear fields", font=('Arial', 12), command=clear_fields, height = 1, width = 10).grid(row=0, column=1, sticky="ne", padx=0, pady=10)
 
 # Status text for guiding user
 status_label = tk.Label(buttons_frame, textvariable=status_text, font=('Arial', 13), wraplength=300, width=35, fg="black")

@@ -8,13 +8,13 @@ Available in English and Finnish.
 
 ## User installation
 
-Download the zip from Releases and extract it into folder of your choice.
+Download the project and either run it locally or compile it. Sections with instructions are below.
 
 Download yt-dlp.exe: https://github.com/yt-dlp/yt-dlp/releases
 
 Download ffmpeg: https://github.com/yt-dlp/FFmpeg-Builds/releases
 
-Extract ffmpeg folder. Move both yt-dlp.exe and ffmpeg.exe to the same folder where tilhi.exe is.
+Extract ffmpeg folder. Move both ffmpeg.exe, ffprobe.exe and yt-dlp.exe to the same folder where tilhi.exe is.
 
 Launch program by double clicking Tilhi.
 
@@ -57,7 +57,7 @@ pip install pyinstaller
 Run in project folder:
 
 ```
-pyinstaller --icon=res/tilhi-icon.ico main.py --onefile
+pyinstaller --name=Tilhi --icon=res/tilhi-icon.ico main.py --onefile
 ```
 
 ## Credits and learning links
