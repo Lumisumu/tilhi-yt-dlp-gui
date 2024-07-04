@@ -14,9 +14,7 @@ Download yt-dlp.exe: https://github.com/yt-dlp/yt-dlp/releases
 
 Download ffmpeg: https://github.com/yt-dlp/FFmpeg-Builds/releases
 
-Extract ffmpeg folder. Move both ffmpeg.exe, ffprobe.exe and yt-dlp.exe to the same folder where tilhi.exe is.
-
-Launch program by double clicking Tilhi.
+Extract ffmpeg folder. Move both ffmpeg.exe, ffprobe.exe and yt-dlp.exe to the same folder where Tilhi is.
 
 ## How to use
 
