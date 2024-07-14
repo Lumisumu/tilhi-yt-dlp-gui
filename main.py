@@ -87,7 +87,11 @@ def start_download():
             os.makedirs(video_target_folder)
 
         # Create yt-dlp command to download the video
-        if checkbox_only_audio.get() == "On":
+        if url_field.get().startswith("yt-dlp "):
+            added_string = "yt-dlp -P " + video_target_folder + " "
+            command = url_field.get().replace("yt-dlp ", added_string)
+            print(command)
+        elif checkbox_only_audio.get() == "On":
             command = 'yt-dlp -P ' + video_target_folder + " -f 140 " + url_field.get()
         else:
             command = 'yt-dlp -P ' + video_target_folder + " " + url_field.get()      
