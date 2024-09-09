@@ -73,7 +73,7 @@ def start_download():
         file_name: str
 
         # Get timestamps
-        timestamp_numbers = [str(start_hours_field.get()), str(start_minutes_field.get()), str(start_seconds_field.get()), str(end_hours_field.get()), str(end_minutes_field.get()), str(end_seconds_field.get())]
+        timestamp_numbers = [start_hours_field.get(), start_minutes_field.get(), start_seconds_field.get(), end_hours_field.get(), end_minutes_field.get(), end_seconds_field.get()]
 
         for entry in range(len(timestamp_numbers)):
             if not timestamp_numbers[entry]:
@@ -96,9 +96,19 @@ def start_download():
             command = target_url.replace("yt-dlp ", added_string)
 
             # Only download video
-            subprocess.run(command, shell=True)
+            process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
 
-            show_message(str("Custom command finished."), "green")
+            output = []
+            for line in process.stdout:
+                print(line, end='')
+                output.append(line.strip())
+
+            process.wait()
+
+            if output and "has already been downloaded" in output[-1]:
+                show_message(str("That video has already been downloaded."), "green")
+            else:
+                show_message(str("Custom command finished."), "green")
             return
 
         # Will the download be audio-only
@@ -214,14 +224,24 @@ def start_download():
                 os.makedirs(video_target_folder)
 
             # Run command
-            subprocess.run(command, shell=True)
+            process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
 
-            # Get latest file name
-            file_location = video_target_folder + "/*"
-            list_of_files = glob.glob(file_location)
-            file_name = max(list_of_files, key=os.path.getctime)
+            output = []
+            for line in process.stdout:
+                print(line, end='')
+                output.append(line.strip())
 
-            show_message(str("Download finished: " + file_name), "green")
+            process.wait()
+
+            if output and "has already been downloaded" in output[-1]: 
+                show_message(str("That video has already been downloaded."), "green")
+            else:
+                # Get latest file name
+                file_location = video_target_folder + "/*"
+                list_of_files = glob.glob(file_location)
+                file_name = max(list_of_files, key=os.path.getctime)
+
+                show_message(str("Download finished: " + file_name), "green")
 
     else:
         show_message("Error: Url field is empty.", "black")
