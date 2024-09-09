@@ -117,9 +117,9 @@ def start_download():
 
         # Will the download be audio-only
         if only_audio_selection == "On":
-            command = 'yt-dlp -P ' + video_target_folder + " -f 140 " + target_url
+            command = 'yt-dlp -P "' + video_target_folder + '" -f 140 ' + target_url
         else:
-            command = 'yt-dlp -P ' + video_target_folder + " " + target_url
+            command = 'yt-dlp -P "' + video_target_folder + '" ' + target_url
 
         # Add video renaming if field is not empty
         if user_input_file_name != "" and only_audio_selection != "On":
@@ -161,7 +161,7 @@ def start_download():
                 # FFmpeg command    
                 # If user wants audio only, replace file extension
 
-                cutter = 'ffmpeg -ss ' + start_timestamp + ' -to ' + end_timestamp + ' -i "' + video_target_folder + "/" + file_name + '" -c copy "' + clip_target_folder + '/' + file_name + " - clip " + date_string
+                cutter = 'ffmpeg -ss ' + start_timestamp + ' -to ' + end_timestamp + ' -i "' + video_target_folder + '/' + file_name + '" -c copy "' + clip_target_folder + '/' + file_name + " - clip " + date_string
 
                 if only_audio_selection == "On":
                     cutter = cutter + '.m4a"'
