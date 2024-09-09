@@ -62,26 +62,38 @@ def resize_image(event):
     canvas.create_image(int(event.width / 2), int(event.height / 2), anchor="center", image=resized_tk)
 
 def start_download():
-    # Init selection variables with defaults
-    video_target_folder = ""
-    clip_target_folder = ""
+    target_url = url_field.get().replace(" ", "")
 
-    if url_field.get() != "":
+    if target_url != "":
+        video_target_folder = full_video_folder_field.get()
+        clip_target_folder = clip_folder_field.get()
+        only_audio_selection = only_audio_checkbox.get()
+        user_input_file_name = rename_field.get()
+        clipping_choice = dropdown_choice.get()
         file_name: str
+
+        # Get timestamps
+        timestamp_numbers = [str(start_hours_field.get()), str(start_minutes_field.get()), str(start_seconds_field.get()), str(end_hours_field.get()), str(end_minutes_field.get()), str(end_seconds_field.get())]
+
+        for entry in range(len(timestamp_numbers)):
+            if not timestamp_numbers[entry]:
+                # If the item is empty, replace it with 0
+                timestamp_numbers[entry] = "0"
+
+        valid_timestamp = any(item != "0" for item in timestamp_numbers)
+
         show_message("Downloading...", "black")
 
         # Set video save location
-        if full_video_folder_field.get() != "":
-            video_target_folder = full_video_folder_field.get()
-        else:
+        if video_target_folder == "":
             video_target_folder = "full-videos"
 
         file_location = video_target_folder + "/*"
 
         # Create yt-dlp command to download the video
-        if url_field.get().startswith("yt-dlp "):
+        if target_url.startswith("yt-dlp "):
             added_string = "yt-dlp -P " + video_target_folder + " "
-            command = url_field.get().replace("yt-dlp ", added_string)
+            command = target_url.replace("yt-dlp ", added_string)
 
             # Only download video
             subprocess.run(command, shell=True)
@@ -90,29 +102,27 @@ def start_download():
             return
 
         # Will the download be audio-only
-        if only_audio_checkbox.get() == "On":
-            command = 'yt-dlp -P ' + video_target_folder + " -f 140 " + url_field.get()
+        if only_audio_selection == "On":
+            command = 'yt-dlp -P ' + video_target_folder + " -f 140 " + target_url
         else:
-            command = 'yt-dlp -P ' + video_target_folder + " " + url_field.get()
+            command = 'yt-dlp -P ' + video_target_folder + " " + target_url
 
         # Add video renaming if field is not empty
-        if rename_field.get() != "" and only_audio_checkbox.get() != "On":
-            renaming_string = ' -o "' + rename_field.get() + '"' 
+        if user_input_file_name != "" and only_audio_selection != "On":
+            renaming_string = ' -o "' + user_input_file_name + '"' 
             command = command + renaming_string
 
         # If end timestamp fields have any entries, make a clip
-        if end_hours_field.get() != "" or end_minutes_field.get() != "" or end_seconds_field.get() != "" or start_hours_field.get() != "" or start_minutes_field.get() != "" or start_seconds_field.get() != "":
+        if valid_timestamp == True:
             # Use FFmpeg to make a clip
-            if dropdown_choice.get() == 'Download video and clip with FFmpeg':
+            if clipping_choice == 'Download video and clip with FFmpeg':
 
                 # Make folder
                 if not os.path.exists(video_target_folder):
                     os.makedirs(video_target_folder)
 
                 # Set clip save location
-                if clip_folder_field.get() != "":
-                    clip_target_folder = clip_folder_field.get()
-                else:
+                if clip_target_folder == "":
                     clip_target_folder = "clips"
 
                 # If clip save folder is not found, make a new folder
@@ -127,16 +137,6 @@ def start_download():
                 list_of_files = glob.glob(file_location)
                 file_name = max(list_of_files, key=os.path.getctime).split("\\")[-1]
 
-                timestamp_numbers = []
-
-                # Add timestamps as int to array and add missing items
-                timestamp_numbers.extend([str(start_hours_field.get()), str(start_minutes_field.get()), str(start_seconds_field.get()), str(end_hours_field.get()), str(end_minutes_field.get()), str(end_seconds_field.get())])
-
-                for i in range(len(timestamp_numbers)):
-                    if not timestamp_numbers[i]:
-                        # If the item is empty, replace it with 0
-                        timestamp_numbers[i] = 0
-
                 start_timestamp = str(timestamp_numbers[0]) + ":" + str(timestamp_numbers[1]) + ":" + str(timestamp_numbers[2])
                 end_timestamp = str(timestamp_numbers[3]) + ":" + str(timestamp_numbers[4]) + ":" + str(timestamp_numbers[5])
 
@@ -149,7 +149,7 @@ def start_download():
 
                 cutter = 'ffmpeg -ss ' + start_timestamp + ' -to ' + end_timestamp + ' -i "' + video_target_folder + "/" + file_name + '" -c copy "' + clip_target_folder + '/' + file_name + " - clip " + date_string
 
-                if only_audio_checkbox.get() == "On":
+                if only_audio_selection == "On":
                     cutter = cutter + '.m4a"'
                 else:
                     cutter = cutter + '.mp4"'
@@ -160,20 +160,8 @@ def start_download():
                 show_message(str("FFmpeg made a clip from downloaded video: " + file_name), "green")
 
             else:
-                timestamp_numbers = []
-
-                # Add timestamps as int to array and add missing items
-                timestamp_numbers.extend([str(start_hours_field.get()), str(start_minutes_field.get()), str(start_seconds_field.get()), str(end_hours_field.get()), str(end_minutes_field.get()), str(end_seconds_field.get())])
-
-                for i in range(len(timestamp_numbers)):
-                    if not timestamp_numbers[i]:
-                        # If the item is empty, replace it with 0
-                        timestamp_numbers[i] = 0
-
                 # Set clip save location
-                if clip_folder_field.get() != "":
-                    clip_target_folder = clip_folder_field.get()
-                else:
+                if clip_target_folder == "":
                     clip_target_folder = "clips"
 
                 clip_file_location = clip_target_folder + "/*"
@@ -197,7 +185,7 @@ def start_download():
                 subprocess.run(clip_command, shell=True)
 
                 # Download both
-                if dropdown_choice.get() == 'Download video and clip':
+                if clipping_choice == 'Download video and clip':
                     # If video save folder is not found, make a new folder
                     if not os.path.exists(video_target_folder):
                         os.makedirs(video_target_folder)
