@@ -45,6 +45,10 @@ class context_menu:
     def select_option(self, e, cmd):
         e.widget.event_generate(f'<<{cmd}>>')
 
+# If user presses Enter key when typing into url field, start download process
+def press_enter(event):
+    th.Thread(target=start_download).start()
+
 # Resize decorative image when window rsize changes
 def resize_image(event):
     global resized_tk
@@ -311,6 +315,7 @@ file_info_frame.rowconfigure(5, weight=1)
 url_label = tk.Label(file_info_frame, text="Video url:", font=('Arial', 13), height = 1).grid(row=1, column=0, sticky="e")
 url_field = tk.Entry(file_info_frame, font=('Arial', 10), width=45)
 url_field.grid(row=1, column=1, sticky="w", padx=5)
+url_field.bind('<Return>', press_enter)
 url_field.bind("<Button-3>", context_menu)
 url_tip_button = tk.Button(file_info_frame, text="\u2753", font=('Arial', 13), height = 1, command=lambda: show_message('Url of video, playlist or channel.\n\nPlaylist/channel url downloads all videos.\n\nYou can also give plain yt-dlp command, it will be executed as is. If video save folder option is used, desired location will be added to the command before downloading. Other options are disabled.', "black"))
 url_tip_button.grid(row=1, column=3, sticky="w", padx=5)
