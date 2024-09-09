@@ -162,6 +162,7 @@ cython_debug/
 # yt-dlp and ffmpeg
 yt-dlp.exe
 ffmpeg.exe
+ffprobe.exe
 
 # Default video save locations
 /full-videos
