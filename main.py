@@ -65,49 +65,73 @@ def resize_image(event):
     resized_tk = ImageTk.PhotoImage(resized_image)
     canvas.create_image(int(event.width / 2), int(event.height / 2), anchor="center", image=resized_tk)
 
+def create_video_folder(video_target_folder):
+    if not os.path.exists(video_target_folder):
+        os.makedirs(video_target_folder)
+
+def create_clip_folder(clip_target_folder):
+    if not os.path.exists(clip_target_folder):
+        os.makedirs(clip_target_folder)
+
+def run_command(command):
+    show_message("Downloading...", "black")
+
+    process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+
+    output = []
+    for line in process.stdout:
+        print(line, end='')
+        output.append(line.strip())
+
+    process.wait()
+
+    return output
+
+# Get the name of the latest finished file and show message
+def show_success_message(file_location):
+    list_of_files = glob.glob(file_location)
+    file_name = max(list_of_files, key=os.path.getctime)
+
+    show_message(str("Download finished: " + file_name), "green")
+
+# Main function that is called when Start Download button is pressed or Enter key is pressed in url field
 def start_download():
     target_url = url_field.get().replace(" ", "")
 
     if target_url != "":
+        show_message("Trying to gather settings...", "black")
+
+        # Get user input from fields
         video_target_folder = full_video_folder_field.get()
         clip_target_folder = clip_folder_field.get()
         only_audio_selection = only_audio_checkbox.get()
         user_input_file_name = rename_field.get()
         clipping_choice = dropdown_choice.get()
         file_name: str
-
-        # Get timestamps
         timestamp_numbers = [start_hours_field.get(), start_minutes_field.get(), start_seconds_field.get(), end_hours_field.get(), end_minutes_field.get(), end_seconds_field.get()]
 
+        # Insert "0" if timestamp item is empty
         for entry in range(len(timestamp_numbers)):
             if not timestamp_numbers[entry]:
                 # If the item is empty, replace it with 0
                 timestamp_numbers[entry] = "0"
 
+        # Flag to check if timestamps are used
         valid_timestamp = any(item != "0" for item in timestamp_numbers)
-
-        show_message("Downloading...", "black")
 
         # Set video save location
         if video_target_folder == "":
             video_target_folder = "full-videos"
+            file_location = "full-videos/*"
+        else:
+            file_location = video_target_folder + "/*"
 
-        file_location = video_target_folder + "/*"
-
-        # Create yt-dlp command to download the video
+        # Custom yt-dlp command option for advanced users
         if target_url.startswith("yt-dlp "):
-            added_string = "yt-dlp -P " + video_target_folder + " "
-            command = target_url.replace("yt-dlp ", added_string)
+            command = target_url.replace("yt-dlp ", str("yt-dlp -P " + video_target_folder + " "))
 
-            # Only download video
-            process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
-
-            output = []
-            for line in process.stdout:
-                print(line, end='')
-                output.append(line.strip())
-
-            process.wait()
+            # Run command
+            output = run_command(command)
 
             if output and "has already been downloaded" in output[-1]:
                 show_message(str("That video has already been downloaded."), "green")
@@ -115,137 +139,101 @@ def start_download():
                 show_message(str("Custom command finished."), "green")
             return
 
-        # Will the download be audio-only
-        if only_audio_selection == "On":
-            command = 'yt-dlp -P "' + video_target_folder + '" -f 140 ' + target_url
+        # Regular download feature, majority of users use this
         else:
-            command = 'yt-dlp -P "' + video_target_folder + '" ' + target_url
-
-        # Add video renaming if field is not empty
-        if user_input_file_name != "" and only_audio_selection != "On":
-            renaming_string = ' -o "' + user_input_file_name + '"' 
-            command = command + renaming_string
-
-        # If end timestamp fields have any entries, make a clip
-        if valid_timestamp == True:
-            # Use FFmpeg to make a clip
-            if clipping_choice == 'Download video and clip with FFmpeg':
-
-                # Make folder
-                if not os.path.exists(video_target_folder):
-                    os.makedirs(video_target_folder)
-
-                # Set clip save location
-                if clip_target_folder == "":
-                    clip_target_folder = "clips"
-
-                # If clip save folder is not found, make a new folder
-                if not os.path.exists(clip_target_folder):
-                    os.makedirs(clip_target_folder)
-
-                # Run command to download full video
-                subprocess.run(command, shell=True)
-
-                # Get latest file name
-                file_location = video_target_folder + "/*"
-                list_of_files = glob.glob(file_location)
-                file_name = max(list_of_files, key=os.path.getctime).split("\\")[-1]
-
-                start_timestamp = str(timestamp_numbers[0]) + ":" + str(timestamp_numbers[1]) + ":" + str(timestamp_numbers[2])
-                end_timestamp = str(timestamp_numbers[3]) + ":" + str(timestamp_numbers[4]) + ":" + str(timestamp_numbers[5])
-
-                ts = time.time()
-                date_string = datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S-%f')
-                date_string = date_string.replace(':', '-')
-
-                # FFmpeg command    
-                # If user wants audio only, replace file extension
-
-                cutter = 'ffmpeg -ss ' + start_timestamp + ' -to ' + end_timestamp + ' -i "' + video_target_folder + '/' + file_name + '" -c copy "' + clip_target_folder + '/' + file_name + " - clip " + date_string
-
-                if only_audio_selection == "On":
-                    cutter = cutter + '.m4a"'
-                else:
-                    cutter = cutter + '.mp4"'
-                
-                # Run the ffmpeg command
-                subprocess.run(cutter, shell=True)
-
-                show_message(str("FFmpeg made a clip from downloaded video: " + file_name), "green")
-
+            if only_audio_selection == "On":
+                command = 'yt-dlp -P "' + video_target_folder + '" -f 140 ' + target_url
             else:
-                # Set clip save location
-                if clip_target_folder == "":
-                    clip_target_folder = "clips"
+                command = 'yt-dlp -P "' + video_target_folder + '" ' + target_url
 
-                clip_file_location = clip_target_folder + "/*"
+            # Add video renaming to the command
+            if user_input_file_name != "":
+                command = command + str(' -o "' + user_input_file_name + '"')
 
-                # Replace the target folder with clip target folder
-                clip_command = command.replace(video_target_folder, clip_target_folder)
+            # If end timestamp fields have any entries, make a clip
+            if valid_timestamp == True:
+                # Use FFmpeg to make a clip
+                if clipping_choice == 'Download video and clip from YT':
+                    create_video_folder(video_target_folder)
 
-                # If clip save folder is not found, make a new folder
-                if not os.path.exists(clip_target_folder):
-                    os.makedirs(clip_target_folder)
+                    # Set clip save location
+                    if clip_target_folder == "":
+                        clip_target_folder = "clips"
 
-                starting_time: int
-                starting_time = (int(timestamp_numbers[0]) * 3600) + (int(timestamp_numbers[1]) * 60) + int(timestamp_numbers[2])
-
-                ending_time: int
-                ending_time = (int(timestamp_numbers[3]) * 3600) + (int(timestamp_numbers[4]) * 60) + int(timestamp_numbers[5])
-
-                clip_command = clip_command + ' --download-sections "*' + str(starting_time) + '-' + str(ending_time) + '"'
-
-                # Run command
-                subprocess.run(clip_command, shell=True)
-
-                # Download both
-                if clipping_choice == 'Download video and clip':
-                    # If video save folder is not found, make a new folder
-                    if not os.path.exists(video_target_folder):
-                        os.makedirs(video_target_folder)
+                    create_clip_folder(clip_target_folder)
 
                     # Run command
-                    subprocess.run(command, shell=True)
+                    run_command(command)
 
                     # Get latest file name
-                    file_location = video_target_folder + "/*"
                     list_of_files = glob.glob(file_location)
-                    file_name = max(list_of_files, key=os.path.getctime)
+                    file_name = max(list_of_files, key=os.path.getctime).split("\\")[-1]
 
-                    show_message(str("Downloads for video and clip finished: " + file_name), "green")
+                    start_timestamp = str(timestamp_numbers[0]) + ":" + str(timestamp_numbers[1]) + ":" + str(timestamp_numbers[2])
+                    end_timestamp = str(timestamp_numbers[3]) + ":" + str(timestamp_numbers[4]) + ":" + str(timestamp_numbers[5])
+
+                    ts = time.time()
+                    date_string = datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S-%f')
+                    date_string = date_string.replace(':', '-')
+
+                    # FFmpeg command    
+                    # If user wants audio only, replace file extension
+
+                    cutter = 'ffmpeg -ss ' + start_timestamp + ' -to ' + end_timestamp + ' -i "' + video_target_folder + '/' + file_name + '" -c copy "' + clip_target_folder + '/' + file_name + " - clip " + date_string
+
+                    if only_audio_selection == "On":
+                        cutter = cutter + '.m4a"'
+                    else:
+                        cutter = cutter + '.mp4"'
+                    
+                    # Run command
+                    run_command(cutter)
+
+                    show_message(str("FFmpeg made a clip from downloaded video: " + file_name), "green")
+
                 else:
-                    # Get latest file name
-                    file_location = clip_target_folder + "/*"
-                    list_of_files = glob.glob(file_location)
-                    file_name = max(list_of_files, key=os.path.getctime)
+                    # Set clip save location
+                    if clip_target_folder == "":
+                        clip_target_folder = "clips"
 
-                    show_message(str("Download finished: " + file_name), "green")
+                    clip_file_location = clip_target_folder + "/*"
 
-        # Download only full video
-        else:
-            # If video save folder is not found, make a new folder
-            if not os.path.exists(video_target_folder):
-                os.makedirs(video_target_folder)
+                    # Replace the target folder with clip target folder
+                    clip_command = command.replace(video_target_folder, clip_target_folder)
 
-            # Run command
-            process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+                    create_clip_folder(clip_target_folder)
 
-            output = []
-            for line in process.stdout:
-                print(line, end='')
-                output.append(line.strip())
+                    starting_time: int
+                    starting_time = (int(timestamp_numbers[0]) * 3600) + (int(timestamp_numbers[1]) * 60) + int(timestamp_numbers[2])
 
-            process.wait()
+                    ending_time: int
+                    ending_time = (int(timestamp_numbers[3]) * 3600) + (int(timestamp_numbers[4]) * 60) + int(timestamp_numbers[5])
 
-            if output and "has already been downloaded" in output[-1]: 
-                show_message(str("That video has already been downloaded."), "green")
+                    clip_command = clip_command + ' --download-sections "*' + str(starting_time) + '-' + str(ending_time) + '"'
+
+                    # Run command
+                    run_command(clip_command)
+
+                    # Download both
+                    if clipping_choice == 'Download video and clip':
+                        create_video_folder(video_target_folder)
+
+                        # Run command
+                        run_command(command)
+
+                    show_success_message(file_location)
+
+            # Download only full video
             else:
-                # Get latest file name
-                file_location = video_target_folder + "/*"
-                list_of_files = glob.glob(file_location)
-                file_name = max(list_of_files, key=os.path.getctime)
+                create_video_folder(video_target_folder)
 
-                show_message(str("Download finished: " + file_name), "green")
+                # Run command
+                output = run_command(command)
+
+                if output and "has already been downloaded" in output[-1]: 
+                    show_message(str("That video has already been downloaded."), "green")
+                else:
+                    show_success_message(file_location)
 
     else:
         show_message("Error: Url field is empty.", "black")
@@ -362,7 +350,7 @@ clip_frame.columnconfigure(2, weight=1)
 clips_label = tk.Label(clip_frame, text="Download clip:", font=('Arial', 13), height = 1).grid(row=0, column=0, sticky="e")
 
 # Dropdown
-dropdown_options = ["Download video and clip with FFmpeg", "Download video and clip", "Download only clip"]
+dropdown_options = ["Download video and clip from YT", "Download video and clip", "Download only clip"]
 dropdown_choice = tk.StringVar()
 dropdown_choice.set(dropdown_options[0])
 dropdown = tk.OptionMenu(clip_frame, dropdown_choice, *dropdown_options)
