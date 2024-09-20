@@ -28,7 +28,6 @@ def clear_fields():
     for item in text_fields:
         item.delete(0, 'end')
 
-    dropdown_choice.set(dropdown_options[0])
     only_audio_checkbox.set(0)
 
 # Open context menu when user right-clicks on a text field, allows user to cut, copy and paste text
@@ -94,11 +93,28 @@ def show_success_message(file_location):
 
     show_message(str("Download finished: " + file_name), "green")
 
+def prepare_timestamps(timestamp_numbers, timestamps):
+    start_timestamp = str(timestamp_numbers[0]) + ":" + str(timestamp_numbers[1]) + ":" + str(timestamp_numbers[2])
+    end_timestamp = str(timestamp_numbers[3]) + ":" + str(timestamp_numbers[4]) + ":" + str(timestamp_numbers[5])
+
+    starting_time: int
+    starting_time = (int(timestamp_numbers[0]) * 3600) + (int(timestamp_numbers[1]) * 60) + int(timestamp_numbers[2])
+    ending_time: int
+    ending_time = (int(timestamp_numbers[3]) * 3600) + (int(timestamp_numbers[4]) * 60) + int(timestamp_numbers[5])
+
+    timestamps = [starting_time, ending_time]
+    return timestamps
+
 # Main function that is called when Start Download button is pressed or Enter key is pressed in url field
 def start_download():
     target_url = url_field.get().replace(" ", "")
 
-    if target_url != "":
+    # If user has not typed into url field, do nothing
+    if target_url == "":
+        show_message("Error: Url field is empty.", "black")
+
+    # Start download process
+    else:
         show_message("Trying to gather settings...", "black")
 
         # Get user input from fields
@@ -106,7 +122,6 @@ def start_download():
         clip_target_folder = clip_folder_field.get()
         only_audio_selection = only_audio_checkbox.get()
         user_input_file_name = rename_field.get()
-        clipping_choice = dropdown_choice.get()
         file_name: str
         timestamp_numbers = [start_hours_field.get(), start_minutes_field.get(), start_seconds_field.get(), end_hours_field.get(), end_minutes_field.get(), end_seconds_field.get()]
 
@@ -119,6 +134,17 @@ def start_download():
         # Flag to check if timestamps are used
         valid_timestamp = any(item != "0" for item in timestamp_numbers)
 
+        # Prepare timestamps and clip folder for download
+        if valid_timestamp == True:
+            timestamps = []
+            timestamps = prepare_timestamps(timestamp_numbers, timestamps)
+
+            # Set clip save location
+            if clip_target_folder == "":
+                clip_target_folder = "clips"
+
+            create_clip_folder(clip_target_folder)
+
         # Set video save location
         if video_target_folder == "":
             video_target_folder = "full-videos"
@@ -126,117 +152,59 @@ def start_download():
         else:
             file_location = video_target_folder + "/*"
 
-        # Custom yt-dlp command option for advanced users
-        if target_url.startswith("yt-dlp "):
-            command = target_url.replace("yt-dlp ", str("yt-dlp -P " + video_target_folder + " "))
+        # Make download command for full video
+        if only_audio_selection == "On":
+            command = 'yt-dlp -P "' + video_target_folder + '" -f 140 ' + target_url
+        else:
+            command = 'yt-dlp -P "' + video_target_folder + '" ' + target_url
 
+        # If user is using file rename field, add it to the command
+        if user_input_file_name != "":
+            command = command + str(' -o "' + user_input_file_name + '"')
+
+        # Download only full video if user is not using timestamps
+        if valid_timestamp == False:
+            create_video_folder(video_target_folder)
+            
             # Run command
             output = run_command(command)
 
-            if output and "has already been downloaded" in output[-1]:
+            # If video has already been downloaded show 
+            if output and "has already been downloaded" in output[-1]: 
                 show_message(str("That video has already been downloaded."), "green")
             else:
-                show_message(str("Custom command finished."), "green")
-            return
+                show_success_message(file_location)
 
-        # Regular download feature, majority of users use this
-        else:
+        # Download full video and then make a clip
+        if valid_timestamp == True:
+            # Run command to download full video
+            output = run_command(command)
+
+            # Get latest file name
+            list_of_files = glob.glob(file_location)
+            latest_file_name = max(list_of_files, key=os.path.getctime).split("\\")[-1]
+            new_file_name = latest_file_name.rsplit('.', 1)[0]
+
+            ts = time.time()
+            date_string = datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S-%f')
+            date_string = date_string.replace(':', '-')
+            
+            # Replace the target folder with clip target folder
+            clip_command = command.replace(video_target_folder, clip_target_folder)
+            clip_command = clip_command + ' --download-sections "*' + str(timestamps[0]) + '-' + str(timestamps[1]) + '"'
+
+            # Make a new command
+            cutter = 'ffmpeg -ss ' + str(timestamps[0]) + ' -to ' + str(timestamps[1]) + ' -i "' + video_target_folder + '/' + latest_file_name + '" -c copy "' + clip_target_folder + '/' + new_file_name + " - clip " + date_string
+
+            # Add file extension name
             if only_audio_selection == "On":
-                command = 'yt-dlp -P "' + video_target_folder + '" -f 140 ' + target_url
+                cutter = cutter + '.m4a"'
             else:
-                command = 'yt-dlp -P "' + video_target_folder + '" ' + target_url
+                cutter = cutter + '.mp4"'
 
-            # Add video renaming to the command
-            if user_input_file_name != "":
-                command = command + str(' -o "' + user_input_file_name + '"')
-
-            # If end timestamp fields have any entries, make a clip
-            if valid_timestamp == True:
-                # Use FFmpeg to make a clip
-                if clipping_choice == 'Download video and clip from YT':
-                    create_video_folder(video_target_folder)
-
-                    # Set clip save location
-                    if clip_target_folder == "":
-                        clip_target_folder = "clips"
-
-                    create_clip_folder(clip_target_folder)
-
-                    # Run command
-                    run_command(command)
-
-                    # Get latest file name
-                    list_of_files = glob.glob(file_location)
-                    file_name = max(list_of_files, key=os.path.getctime).split("\\")[-1]
-
-                    start_timestamp = str(timestamp_numbers[0]) + ":" + str(timestamp_numbers[1]) + ":" + str(timestamp_numbers[2])
-                    end_timestamp = str(timestamp_numbers[3]) + ":" + str(timestamp_numbers[4]) + ":" + str(timestamp_numbers[5])
-
-                    ts = time.time()
-                    date_string = datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S-%f')
-                    date_string = date_string.replace(':', '-')
-
-                    # FFmpeg command    
-                    # If user wants audio only, replace file extension
-
-                    cutter = 'ffmpeg -ss ' + start_timestamp + ' -to ' + end_timestamp + ' -i "' + video_target_folder + '/' + file_name + '" -c copy "' + clip_target_folder + '/' + file_name + " - clip " + date_string
-
-                    if only_audio_selection == "On":
-                        cutter = cutter + '.m4a"'
-                    else:
-                        cutter = cutter + '.mp4"'
-                    
-                    # Run command
-                    run_command(cutter)
-
-                    show_message(str("FFmpeg made a clip from downloaded video: " + file_name), "green")
-
-                else:
-                    # Set clip save location
-                    if clip_target_folder == "":
-                        clip_target_folder = "clips"
-
-                    clip_file_location = clip_target_folder + "/*"
-
-                    # Replace the target folder with clip target folder
-                    clip_command = command.replace(video_target_folder, clip_target_folder)
-
-                    create_clip_folder(clip_target_folder)
-
-                    starting_time: int
-                    starting_time = (int(timestamp_numbers[0]) * 3600) + (int(timestamp_numbers[1]) * 60) + int(timestamp_numbers[2])
-
-                    ending_time: int
-                    ending_time = (int(timestamp_numbers[3]) * 3600) + (int(timestamp_numbers[4]) * 60) + int(timestamp_numbers[5])
-
-                    clip_command = clip_command + ' --download-sections "*' + str(starting_time) + '-' + str(ending_time) + '"'
-
-                    # Run command
-                    run_command(clip_command)
-
-                    # Download both
-                    if clipping_choice == 'Download video and clip':
-                        create_video_folder(video_target_folder)
-
-                        # Run command
-                        run_command(command)
-
-                    show_success_message(file_location)
-
-            # Download only full video
-            else:
-                create_video_folder(video_target_folder)
-
-                # Run command
-                output = run_command(command)
-
-                if output and "has already been downloaded" in output[-1]: 
-                    show_message(str("That video has already been downloaded."), "green")
-                else:
-                    show_success_message(file_location)
-
-    else:
-        show_message("Error: Url field is empty.", "black")
+            # Run command to cut clip
+            output = run_command(cutter)
+            show_success_message(file_location)
 
 # Create window
 window = tk.Tk()
@@ -344,24 +312,14 @@ clip_frame = tk.Frame(l_frame)
 clip_frame.grid(row=2, column=0, sticky="nsew")
 clip_frame.columnconfigure(0, weight=1)
 clip_frame.columnconfigure(1, weight=1)
-clip_frame.columnconfigure(2, weight=1)
 
 # Label
 clips_label = tk.Label(clip_frame, text="Download clip:", font=('Arial', 13), height = 1).grid(row=0, column=0, sticky="e")
 
-# Dropdown
-dropdown_options = ["Download video and clip from YT", "Download video and clip", "Download only clip"]
-dropdown_choice = tk.StringVar()
-dropdown_choice.set(dropdown_options[0])
-dropdown = tk.OptionMenu(clip_frame, dropdown_choice, *dropdown_options)
-dropdown.grid(row=0, column=1, sticky="nws", padx=0)
-arrow_image = ImageTk.PhotoImage(Image.open("res/arrow.png"))
-dropdown.configure(indicatoron=0, compound=tk.RIGHT, image= arrow_image)
-full_video_folder_tip_button = tk.Button(clip_frame, text="\u2753", font=('Arial', 13), height = 1, command=lambda: show_message('Clips are made if timestamp fields have any numbers. Timestamps are in format: hh:mm:ss.\n\nThe first option, FFmpeg, is recommended for Youtube videos as the other two might result in faulty video. Note that FFmpeg downloads the entire video before making a clip.\n\nOther two work mostly without issues on other sites. Last option downloads only the clip and is the fastest method.', "black"))
-full_video_folder_tip_button.grid(row=0, column=2, sticky="w", padx=5)
-
 # Label
 time_label = tk.Label(clip_frame, text="Timestamps:", font=('Arial', 13), height = 1).grid(row=1, column=0, sticky="e")
+timestamps_tip_button = tk.Button(clip_frame, text="\u2753", font=('Arial', 13), height = 1, command=lambda: show_message('Clips are made if timestamp fields have any numbers. Timestamps are in format: hh:mm:ss.', "black"))
+timestamps_tip_button.grid(row=0, column=2, sticky="w", padx=5)
 
 # Grid for timestamps
 timestamps_frame = tk.Frame(clip_frame)
@@ -377,6 +335,7 @@ timestamps_frame.columnconfigure(7, weight=1)
 timestamps_frame.columnconfigure(8, weight=1)
 timestamps_frame.columnconfigure(9, weight=1)
 timestamps_frame.columnconfigure(10, weight=1)
+timestamps_frame.columnconfigure(11, weight=1)
 timestamps_frame.rowconfigure(0, weight=1)
 
 start_hours_field = tk.Entry(timestamps_frame, justify="center", font=('Arial', 13), width=5)
