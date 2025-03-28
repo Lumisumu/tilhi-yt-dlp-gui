@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter import ttk
 from PIL import Image, ImageTk
+from pathlib import Path
 import os
 import subprocess
 import string
@@ -20,6 +21,17 @@ def show_message(message: str, color: str):
 def update_ytdlp():
     result = subprocess.run("yt-dlp --update", stdout=subprocess.PIPE, text=True, shell=True)
     show_message(next((line for line in reversed(result.stdout.split('\n')) if line), ""), "black")
+
+# Open the target save location
+def open_folder():
+    target_folder = full_video_folder_field.get()
+
+    if target_folder != "":
+            path = target_folder
+            os.startfile(path)
+    else:
+        path = Path.cwd()
+        os.startfile(path)
 
 # Reset fields to default settings
 def clear_fields():
@@ -386,13 +398,16 @@ buttons_frame.rowconfigure(0, weight=1)
 buttons_frame.rowconfigure(1, weight=1)
 
 # Button to update yt-dlp
-ytdlp_update_button = tk.Button(buttons_frame, text="Update yt-dlp", font=('Arial', 12), command=lambda: th.Thread(target=update_ytdlp).start(), height = 1, width = 10).grid(row=0, column=1, sticky="news", padx=20, pady=10)
+ytdlp_update_button = tk.Button(buttons_frame, text="Update yt-dlp", font=('Arial', 12), command=lambda: th.Thread(target=update_ytdlp).start(), height = 1, width = 10).grid(row=0, column=0, sticky="news", padx=5, pady=10)
+
+# Button to open folder
+open_folder_button = tk.Button(buttons_frame, text="Open folder", font=('Arial', 12), command=open_folder, height = 1, width = 10).grid(row=0, column=1, sticky="news", padx=5, pady=10)
 
 # Button to clear fields
-clear_fields_button = tk.Button(buttons_frame, text="Clear fields", font=('Arial', 12), command=clear_fields, height = 1, width = 10).grid(row=0, column=2, sticky="news", padx=0, pady=10)
+clear_fields_button = tk.Button(buttons_frame, text="Clear fields", font=('Arial', 12), command=clear_fields, height = 1, width = 10).grid(row=0, column=2, sticky="news", padx=5, pady=10)
 
 # Button to start download
-start_button = tk.Button(buttons_frame, text="Start", font=('Arial', 15), command=lambda: th.Thread(target=start_download).start(), height = 1, width = 15, bg="lightgreen").grid(row=0, column=3, sticky="news", padx=20, pady=10)
+start_button = tk.Button(buttons_frame, text="Start", font=('Arial', 15), command=lambda: th.Thread(target=start_download).start(), height = 1, width = 15, bg="lightgreen").grid(row=0, column=3, sticky="news", padx=5, pady=10)
 
 # Start process
 window.mainloop()
