@@ -1,5 +1,6 @@
 import tkinter as tk
 from tkinter import ttk
+from tkinter.filedialog import askdirectory
 from PIL import Image, ImageTk
 from pathlib import Path
 import os
@@ -32,6 +33,20 @@ def open_folder():
     else:
         path = Path.cwd()
         os.startfile(path)
+
+# Open window for folder selection
+def open_location_select(type: str):
+    selected_folder = askdirectory()
+
+    if type == "full":
+        full_video_folder_field.delete(0, tk.END)
+        full_video_folder_field.insert(0, selected_folder)
+        print("New selected save folder for full videos: " + selected_folder)
+    
+    elif type == "clips":
+        clip_folder_field.delete(0, tk.END)
+        clip_folder_field.insert(0, selected_folder)
+        print("New selected save folder for clips: " + selected_folder)
 
 # Reset fields to default settings
 def clear_fields():
@@ -85,8 +100,6 @@ def create_clip_folder(clip_target_folder):
         os.makedirs(clip_target_folder)
 
 def run_command(command):
-    show_message("Downloading...", "black")
-
     process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
 
     output = []
@@ -176,7 +189,10 @@ def start_download():
 
         # Download only full video if user is not using timestamps
         if valid_timestamp == False:
+            show_message("Downloading...", "black")
             create_video_folder(video_target_folder)
+
+            print(command)
             
             # Run command
             output = run_command(command)
@@ -188,7 +204,8 @@ def start_download():
                 show_success_message(file_location)
 
         # Download full video and then make a clip
-        if valid_timestamp == True:
+        elif valid_timestamp == True:
+            show_message("Downloading and cutting a clip...", "black")
             # Run command to download full video
             output = run_command(command)
 
@@ -214,9 +231,16 @@ def start_download():
             else:
                 cutter = cutter + '.mp4"'
 
+            print(cutter)
+
             # Run command to cut clip
             output = run_command(cutter)
-            show_success_message(file_location)
+
+            # If video has already been downloaded show 
+            if output and "has already been downloaded" in output[-1]: 
+                show_message(str("That video has already been downloaded. Clip has been created."), "green")
+            else:
+                show_success_message(file_location)
 
 # Create window
 window = tk.Tk()
@@ -281,7 +305,7 @@ file_info_frame.rowconfigure(5, weight=1)
 
 # Url field
 url_label = tk.Label(file_info_frame, text="Video url:", font=('Arial', 13), height = 1).grid(row=1, column=0, sticky="e")
-url_field = tk.Entry(file_info_frame, font=('Arial', 10), width=45)
+url_field = tk.Entry(file_info_frame, font=('Arial', 10), width=40)
 url_field.grid(row=1, column=1, sticky="w", padx=5)
 url_field.bind('<Return>', press_enter)
 url_field.bind("<Button-3>", context_menu)
@@ -294,7 +318,7 @@ only_audio_checkbutton = tk.Checkbutton(file_info_frame, text="Download only aud
 
 # Rename field
 rename_label = tk.Label(file_info_frame, text="Rename file:", wraplength=200, font=('Arial', 13), height = 2).grid(row=3, column=0, sticky="e")
-rename_field = tk.Entry(file_info_frame, font=('Arial', 10), width=45)
+rename_field = tk.Entry(file_info_frame, font=('Arial', 10), width=40)
 rename_field.grid(row=3, column=1, sticky="w", padx=5)
 rename_field.bind("<Button-3>", context_menu)
 rename_tip_button = tk.Button(file_info_frame, text="\u2753", font=('Arial', 13), height = 1, command=lambda: show_message('Default name includes video title and id.\n\nRenaming is not possible for audio-only downloads.', "black"))
@@ -302,17 +326,21 @@ rename_tip_button.grid(row=3, column=3, sticky="w", padx=5)
 
 # Video save location field
 full_video_folder_label = tk.Label(file_info_frame, text="Video save folder:", wraplength=200, font=('Arial', 13), height = 2).grid(row=4, column=0, sticky="e")
-full_video_folder_field = tk.Entry(file_info_frame, font=('Arial', 10), width=45)
+full_video_folder_field = tk.Entry(file_info_frame, font=('Arial', 10), width=40)
 full_video_folder_field.grid(row=4, column=1, sticky="w", padx=5)
 full_video_folder_field.bind("<Button-3>", context_menu)
+full_video_folder_select_button = tk.Button(file_info_frame, text="Select folder", font=('Arial', 13), height = 1, command=lambda: open_location_select("full"))
+full_video_folder_select_button.grid(row=4, column=2, sticky="w", padx=5)
 full_video_folder_tip_button = tk.Button(file_info_frame, text="\u2753", font=('Arial', 13), height = 1, command=lambda: show_message('Default save folder is "full-videos". It is created in the same folder where program is run.\n\nFolder name cannot include spaces or special symbols.', "black"))
 full_video_folder_tip_button.grid(row=4, column=3, sticky="w", padx=5)
 
 # Clip save location field
 clip_folder_label = tk.Label(file_info_frame, text="Clip save folder:", wraplength=200, font=('Arial', 13), height = 2).grid(row=5, column=0, sticky="e")
-clip_folder_field = tk.Entry(file_info_frame, font=('Arial', 10), width=45)
+clip_folder_field = tk.Entry(file_info_frame, font=('Arial', 10), width=40)
 clip_folder_field.grid(row=5, column=1, sticky="w", padx=5)
 clip_folder_field.bind("<Button-3>", context_menu)
+full_video_folder_select_button = tk.Button(file_info_frame, text="Select folder", font=('Arial', 13), height = 1, command=lambda: open_location_select("clips"))
+full_video_folder_select_button.grid(row=5, column=2, sticky="w", padx=5)
 clip_tip_button = tk.Button(file_info_frame, text="\u2753", font=('Arial', 13), height = 1, command=lambda: show_message('Default save folder is "clips". It is created in the same folder where program is run.\n\nFolder name cannot include spaces or special symbols.', "black"))
 clip_tip_button.grid(row=5, column=3, sticky="w", padx=5)
 
