@@ -36,6 +36,12 @@ Install "Pillow" module with pip:
 pip install Pillow
 ```
 
+Install "Pyperclip" module with pip:
+
+```
+pip install pyperclip
+```
+
 Start program by running:
 
 ```

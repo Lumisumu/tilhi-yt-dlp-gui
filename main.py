@@ -11,7 +11,7 @@ import threading as th
 import glob
 import time
 import datetime
-
+import pyperclip
 
 # Show messages on the right side of the window
 def show_message(message: str, color: str):
@@ -41,12 +41,10 @@ def open_location_select(type: str):
     if type == "full":
         full_video_folder_field.delete(0, tk.END)
         full_video_folder_field.insert(0, selected_folder)
-        print("New selected save folder for full videos: " + selected_folder)
     
     elif type == "clips":
         clip_folder_field.delete(0, tk.END)
         clip_folder_field.insert(0, selected_folder)
-        print("New selected save folder for clips: " + selected_folder)
 
 # Reset fields to default settings
 def clear_fields():
@@ -56,6 +54,17 @@ def clear_fields():
         item.delete(0, 'end')
 
     only_audio_checkbox.set(0)
+
+# Copy text to system clipboard
+def copy_to_clipboard(type, command):
+    text = str(command[0])
+    pyperclip.copy(text)
+
+    if type == "full":
+        show_message("yt-dlp command copied to clipboard.", "black")
+    else:
+        show_message("FFMPEG command copied to clipboard.", "black")
+
 
 # Open context menu when user right-clicks on a text field, allows user to cut, copy and paste text
 class context_menu:
@@ -196,12 +205,12 @@ def start_download():
             show_message("Downloading...", "black")
             create_video_folder(video_target_folder)
 
-            print(command)
+            # Show the command and save it to variable for copying
+            command_var[0] = command
+            full_video_command_text.set(command)
             
             # Run command
             output = run_command(command)
-
-            print(output)
 
             # If video has already been downloaded show 
             if "has already been" in output:
@@ -216,6 +225,11 @@ def start_download():
         # Download full video and then make a clip
         elif valid_timestamp == True:
             show_message("Downloading and cutting a clip...", "black")
+
+            # Show the command as text for copying
+            command_var[0] = command
+            full_video_command_text.set(command)
+
             # Run command to download full video
             output = run_command(command)
 
@@ -241,7 +255,9 @@ def start_download():
             else:
                 cutter = cutter + '.mp4"'
 
-            print(cutter)
+            # Show the command as text for copying
+            cutter_var[0] = cutter
+            clip_command_text.set(cutter)
 
             # Run command to cut clip
             ffmpeg_cut = subprocess.Popen(cutter, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
@@ -264,9 +280,17 @@ image_original = Image.open("res/cover.jpg")
 image_ratio = image_original.size[0] / image_original.size[1]
 image_tk = ImageTk.PhotoImage(image_original)
 
-# Status text variable
+# Text variables
 status_text = tk.StringVar()
 status_text.set("Input video url and press Start to download.")
+full_video_command_text = tk.StringVar()
+full_video_command_text.set("(yt-dlp command)")
+clip_command_text = tk.StringVar()
+clip_command_text.set("(FFMPEG command)")
+
+# yt-dlp and FFMPEG commands
+command_var = [""]
+cutter_var = [""]
 
 # Main grid
 window.columnconfigure(0, weight = 1)
@@ -289,6 +313,7 @@ l_frame.rowconfigure(1, weight=1)
 l_frame.rowconfigure(2, weight=1)
 l_frame.rowconfigure(3, weight=1)
 l_frame.rowconfigure(4, weight=1)
+l_frame.rowconfigure(5, weight=1)
 
 # Decoration image on the left side of the window
 canvas = tk.Canvas(r_frame, background="grey", bd=0, highlightthickness=0, width=40, height=40)
@@ -365,11 +390,11 @@ clip_frame.columnconfigure(0, weight=1)
 clip_frame.columnconfigure(1, weight=1)
 
 # Label
-clips_label = tk.Label(clip_frame, text="Download clip:", font=('Arial', 13), height = 1).grid(row=0, column=0, sticky="e")
+clips_label = tk.Label(clip_frame, text="Download clip", font=('Arial', 13), height = 1).grid(row=0, column=0, sticky="e")
 
 # Label
 time_label = tk.Label(clip_frame, text="Timestamps:", font=('Arial', 13), height = 1).grid(row=1, column=0, sticky="e")
-timestamps_tip_button = tk.Button(clip_frame, text="\u2753", font=('Arial', 13), height = 1, command=lambda: show_message('Clips are made if timestamp fields have any numbers. Timestamps are in format: hh:mm:ss.', "black"))
+timestamps_tip_button = tk.Button(clip_frame, text="\u2753", font=('Arial', 13), height = 1, command=lambda: show_message('Clips are made after the download if timestamp fields have any numbers. Timestamps are in format: hh:mm:ss.', "black"))
 timestamps_tip_button.grid(row=0, column=2, sticky="w", padx=5)
 
 # Grid for timestamps
@@ -447,6 +472,26 @@ clear_fields_button = tk.Button(buttons_frame, text="Clear fields", font=('Arial
 
 # Button to start download
 start_button = tk.Button(buttons_frame, text="Start", font=('Arial', 15), command=lambda: th.Thread(target=start_download).start(), height = 1, width = 15, bg="lightgreen").grid(row=0, column=3, sticky="news", padx=5, pady=10)
+
+# Grid for command text fields
+commands_frame = tk.Frame(l_frame)
+commands_frame.grid(row=5, column=0, sticky="news")
+commands_frame.columnconfigure(0, weight=1)
+commands_frame.columnconfigure(1, weight=1)
+commands_frame.rowconfigure(0, weight=1)
+commands_frame.rowconfigure(1, weight=1)
+
+# Button and label for copying yt-dlp command
+full_video_command_tip_button = tk.Button(commands_frame, text="Copy to clipboard", font=('Arial', 13), height = 1, width=20, command=lambda: th.Thread(target=copy_to_clipboard("full", command_var)).start())
+full_video_command_tip_button.grid(row=0, column=0, sticky="ew", padx=5)
+full_video_command_title = tk.Label(commands_frame, textvariable=full_video_command_text, font=('Arial', 10), height = 1, width = 50, anchor="w")
+full_video_command_title.grid(row=0, column=1, sticky="e")
+
+# Button and label for copying FFMPEG command
+clip_command_tip_button = tk.Button(commands_frame, text="Copy to clipboard", font=('Arial', 13), height = 1, width=20, command=lambda: th.Thread(target=copy_to_clipboard("clip", cutter_var)).start())
+clip_command_tip_button.grid(row=1, column=0, sticky="ew", padx=5)
+clip_command_title = tk.Label(commands_frame, textvariable=clip_command_text, font=('Arial', 10), height = 1, width = 50, anchor="w")
+clip_command_title.grid(row=1, column=1, sticky="e")
 
 # Start process
 window.mainloop()
