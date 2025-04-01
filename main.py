@@ -234,7 +234,8 @@ def start_download():
             print(cutter)
 
             # Run command to cut clip
-            output = run_command(cutter)
+            ffmpeg_cut = subprocess.Popen(cutter, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            ffmpeg_cut.wait()
 
             # If video has already been downloaded show 
             if output and "has already been downloaded" in output[-1]: 
