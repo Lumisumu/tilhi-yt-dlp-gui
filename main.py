@@ -101,11 +101,15 @@ def create_clip_folder(clip_target_folder):
 
 def run_command(command):
     process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+    output = None
+    result = None
 
-    output = []
     for line in process.stdout:
         print(line, end='')
-        output.append(line.strip())
+        result = line.strip()
+
+    if result:
+        output = result
 
     process.wait()
 
@@ -197,11 +201,17 @@ def start_download():
             # Run command
             output = run_command(command)
 
+            print(output)
+
             # If video has already been downloaded show 
-            if output and "has already been downloaded" in output[-1]: 
+            if "has already been" in output:
                 show_message(str("That video has already been downloaded."), "green")
-            else:
+            elif "truncated" in output:
+                show_message(str("Incomplete link, check the url address."), "red")
+            elif "Deleting original" in output or "Merging formats" in output or "100%" in output:
                 show_success_message(file_location)
+            else:
+                show_message(str("Confirm the results in cmd and target folder."), "black")
 
         # Download full video and then make a clip
         elif valid_timestamp == True:
