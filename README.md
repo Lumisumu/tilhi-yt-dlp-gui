@@ -1,6 +1,6 @@
-# Tilhi - yt-dlp GUI
+# Tilhi
 
-Tilhi is an easy-to-use graphic use interface for yt-dlp and ffmpeg. Download videos from the web and save them as either video or audio. You can also create clips to capture highlights of long videos/streams. Project goal is to make a handy tool for my friend who has had difficulty using command-line programs.
+Tilhi is an easy-to-use graphic use interface that combines yt-dlp and FFMPEG to download and clip videos. Download videos from the web and save them as either video or audio. You can also create clips to capture highlights of long videos/streams and use custom link lists to automate downloading multiple videos. The goal of this project is to make a handy tool for my friend who has had difficulty using command-line programs.
 
 Active development done in English, version with Finnish UI translation available in a separate branch.
 
@@ -17,6 +17,8 @@ Extract ffmpeg folder. Move ffmpeg.exe, ffprobe.exe and yt-dlp.exe to the same f
 ## How to use
 
 Only required input field is the url address of the video page you want to download from. Videos are downloaded in webm file format. Pressing Enter key when typing into url field starts the download process instantly.
+
+If you want to download multiple videos in succession, use a custom link list. Create a .txt file into "lists" folder. For example, if you text file is called "MyVideos" type MyVideos.txt into the url field. You can use the custom full videos save location and audio-only download functions with this, but other functions are disabled for link list downloads. Write only one link per line in the txt file.
 
 You can also a clip by filling timestamp field and it uses HH:MM:SS format. Only ending timestamp is required, starting timestamp starts from 00:00:00 by default. Empty fields are filled with "00". Program downloads the full video first, then cuts a clip into a different folder with ffmpeg.
 
