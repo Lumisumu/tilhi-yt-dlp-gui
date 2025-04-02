@@ -200,8 +200,70 @@ def start_download():
         if user_input_file_name != "":
             command = command + str(' -o "' + user_input_file_name + '"')
 
+        # Download only full videos with a user made list from "lists" folder
+        if target_url[-3:] == "txt":
+            show_message("Downloading multiple videos by using a txt file...", "black")
+            link_list = "lists/" + target_url
+
+            if os.path.exists(link_list):
+                # Variables for reporting the results of list download
+                already_done_downloads = 0
+                finished_downloads = 0
+                failed_downloads = 0
+                unsure_downloads = 0
+                failed_downloads_list = []
+                unsure_downloads_list = []
+
+                # Open text file
+                f = open(link_list, "r")
+
+                # Loops the times of lines in the text file
+                for x in f:
+                    current_video_url = (x.strip().replace(" ", ""))
+                    print("Current download target url: " + current_video_url)
+
+                    # Make download command for full video
+                    if only_audio_selection == "On":
+                        command = 'yt-dlp -P "' + video_target_folder + '" -f 140 ' + current_video_url
+                    else:
+                        command = 'yt-dlp -P "' + video_target_folder + '" ' + current_video_url
+
+                    print("yt-dlp command: " + command)
+                    output = run_command(command)
+
+                    # If video has already been downloaded show 
+                    if "has already been" in output:
+                        print("That video has already been downloaded: " + current_video_url)
+                        already_done_downloads += 1
+                    elif "truncated" in output:
+                        print("Incomplete link, check the url address for: " + current_video_url)
+                        failed_downloads += 1
+                        failed_downloads_list.append(current_video_url)
+                    elif "Deleting original" in output or "Merging formats" in output or "100%" in output:
+                        print("Download finished for: " + current_video_url)
+                        finished_downloads += 1
+                    else:
+                        print("Confirm the results in cmd and target folder." + current_video_url)
+                        unsure_downloads += 1
+                        unsure_downloads_list.append(current_video_url)
+                    
+                    print("\n\n")
+
+                # Show message that details the results of list download
+                show_message("Downloading multiple videos finished, check the folder and command line message for results.", "green")
+                print("\nLIST DOWNLOAD RESULTS:\n" + str(failed_downloads) + " failed downloads\n" + str(unsure_downloads) + " downloads where result cannot be parsed (usually successful)\n" + str(already_done_downloads) + " already downloaded videos (these are skipped)\n" + str(finished_downloads) + " successfully finished downloads.\n")
+                if failed_downloads_list != []:
+                    print("Failed downloads:")
+                    print(failed_downloads_list)
+                if unsure_downloads_list != []:
+                    print("Unconfirmed results:")
+                    print(unsure_downloads_list)
+
+            else:
+                show_message('Text file not found in "lists" folder, check file name and file extension.', "red")
+
         # Download only full video if user is not using timestamps
-        if valid_timestamp == False:
+        elif valid_timestamp == False:
             show_message("Downloading...", "black")
             create_video_folder(video_target_folder)
 
@@ -345,7 +407,7 @@ url_field = tk.Entry(file_info_frame, font=('Arial', 10), width=40)
 url_field.grid(row=1, column=1, sticky="w", padx=5)
 url_field.bind('<Return>', press_enter)
 url_field.bind("<Button-3>", context_menu)
-url_tip_button = tk.Button(file_info_frame, text="\u2753", font=('Arial', 13), height = 1, command=lambda: show_message('Url of video, playlist or channel.\n\nPlaylist/channel url downloads all videos.\n\nYou can also give plain yt-dlp command, it will be executed as is. If video save folder option is used, desired location will be added to the command before downloading. Other options are disabled.', "black"))
+url_tip_button = tk.Button(file_info_frame, text="\u2753", font=('Arial', 13), height = 1, command=lambda: show_message('Url of video, playlist, channel or name of your own txt file.\n\nPlaylist/channel url downloads all videos.\n\nIf you want to use your own list for downloadable videos, create a txt file in the "lists" folder and write the file name (including the ".txt") into the url field. Example txt file is in the "lists" folder.', "black"))
 url_tip_button.grid(row=1, column=3, sticky="w", padx=5)
 
 # Only-audio checkbox
