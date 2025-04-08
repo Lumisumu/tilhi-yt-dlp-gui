@@ -13,6 +13,9 @@ import time
 import datetime
 import pyperclip
 
+# Set working directory
+os.chdir(os.path.dirname(os.path.abspath(__file__)))
+
 # Show messages on the right side of the window
 def show_message(message: str, color: str):
     status_text.set(message)
