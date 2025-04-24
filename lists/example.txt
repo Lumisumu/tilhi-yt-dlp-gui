@@ -1,3 +1,7 @@
-link 1
-link 2
-link 3
+# Add your links in a text file like this, one link per line.
+# Enter text file name into url field and press Start.
+# Remember to add ".txt" to the end. For example, this file
+# is called example.txt when entered into url field.
+link
+link
+link

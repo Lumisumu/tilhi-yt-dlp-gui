@@ -222,35 +222,45 @@ def start_download():
 
                 # Loops the times of lines in the text file
                 for x in f:
-                    current_video_url = (x.strip().replace(" ", ""))
-                    print("Current download target url: " + current_video_url)
-
-                    # Make download command for full video
-                    if only_audio_selection == "On":
-                        command = 'yt-dlp -P "' + video_target_folder + '" -f 140 ' + current_video_url
+                    if x[0] == "#":
+                        print("Comment line skipped.")
+                    elif x.strip() == "":
+                        print("Empty line skipped.")
+                    # Check if the line is empty or commented out
                     else:
-                        command = 'yt-dlp -P "' + video_target_folder + '" ' + current_video_url
+                        # Remove spaces from current line
+                        current_video_url = (x.strip().replace(" ", ""))
+                        print("Current download target url: " + current_video_url)
 
-                    print("yt-dlp command: " + command)
-                    output = run_command(command)
+                        # Create command
+                        if only_audio_selection == "On":
+                            command = 'yt-dlp -P "' + video_target_folder + '" -f 140 ' + current_video_url
+                        else:
+                            command = 'yt-dlp -P "' + video_target_folder + '" ' + current_video_url
+                        print("yt-dlp command: " + command)
 
-                    # If video has already been downloaded show 
-                    if "has already been" in output:
-                        print("That video has already been downloaded: " + current_video_url)
-                        already_done_downloads += 1
-                    elif "truncated" in output:
-                        print("Incomplete link, check the url address for: " + current_video_url)
-                        failed_downloads += 1
-                        failed_downloads_list.append(current_video_url)
-                    elif "Deleting original" in output or "Merging formats" in output or "100%" in output:
-                        print("Download finished for: " + current_video_url)
-                        finished_downloads += 1
-                    else:
-                        print("Confirm the results in cmd and target folder." + current_video_url)
-                        unsure_downloads += 1
-                        unsure_downloads_list.append(current_video_url)
-                    
-                    print("\n\n")
+                        # Run command
+                        output = run_command(command)
+
+                        # Show result in command line window
+                        if output != None:
+                            # If video has already been downloaded show 
+                            if "has already been" in output:
+                                print("That video has already been downloaded: " + current_video_url)
+                                already_done_downloads += 1
+                            elif "truncated" in output:
+                                print("Incomplete link, check the url address for: " + current_video_url)
+                                failed_downloads += 1
+                                failed_downloads_list.append(current_video_url)
+                            elif "Deleting original" in output or "Merging formats" in output or "100%" in output:
+                                print("Download finished for: " + current_video_url)
+                                finished_downloads += 1
+                            else:
+                                print("Confirm the results in cmd and target folder." + current_video_url)
+                                unsure_downloads += 1
+                                unsure_downloads_list.append(current_video_url)
+                            
+                            print("\n\n")
 
                 # Show message that details the results of list download
                 show_message("Downloading multiple videos finished, check the folder and command line message for results.", "green")
