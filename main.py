@@ -401,7 +401,7 @@ status_label.grid(row=1, column=0, padx=0, sticky="news")
 
 # Grid for file settings
 file_info_frame = tk.Frame(l_frame)
-file_info_frame.grid(row=0, column=0, sticky="nsew")
+file_info_frame.grid(row=0, column=0, sticky="nsew", padx=5)
 file_info_frame.columnconfigure(0, weight=1)
 file_info_frame.columnconfigure(1, weight=1)
 file_info_frame.columnconfigure(2, weight=1)
@@ -469,7 +469,7 @@ clips_label = tk.Label(clip_frame, text="Download clip", font=('Arial', 13), hei
 
 # Label
 time_label = tk.Label(clip_frame, text="Timestamps:", font=('Arial', 13), height = 1).grid(row=1, column=0, sticky="e")
-timestamps_tip_button = tk.Button(clip_frame, text="\u2753", font=('Arial', 13), height = 1, command=lambda: show_message('Clips are made after the download if timestamp fields have any numbers. Timestamps are in format: hh:mm:ss.', "black"))
+timestamps_tip_button = tk.Button(clip_frame, text="\u2753", font=('Arial', 13), height = 1, command=lambda: show_message('Clips are made after the download if timestamp fields have any numbers. Timestamps are in format: hh:mm:ss (hours, minutes, seconds).', "black"))
 timestamps_tip_button.grid(row=0, column=2, sticky="w", padx=5)
 
 # Grid for timestamps
@@ -528,7 +528,7 @@ separator2 = ttk.Separator(l_frame, orient="horizontal").grid(row=3, column=0, c
 
 # Grid for buttons
 buttons_frame = tk.Frame(l_frame)
-buttons_frame.grid(row=4, column=0, sticky="news")
+buttons_frame.grid(row=4, column=0, sticky="news", padx=5)
 buttons_frame.columnconfigure(0, weight=1)
 buttons_frame.columnconfigure(1, weight=1)
 buttons_frame.columnconfigure(2, weight=1)
@@ -550,7 +550,7 @@ start_button = tk.Button(buttons_frame, text="Start", font=('Arial', 15), comman
 
 # Grid for command text fields
 controls_frame = tk.Frame(l_frame)
-controls_frame.grid(row=5, column=0, sticky="news")
+controls_frame.grid(row=5, column=0, sticky="news", padx=5)
 controls_frame.columnconfigure(0, weight=1)
 controls_frame.columnconfigure(1, weight=1)
 controls_frame.rowconfigure(0, weight=1)
