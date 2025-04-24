@@ -539,23 +539,23 @@ clear_fields_button = tk.Button(buttons_frame, text="Clear fields", font=('Arial
 start_button = tk.Button(buttons_frame, text="Start", font=('Arial', 15), command=lambda: th.Thread(target=start_download).start(), height = 1, width = 15, bg="lightgreen").grid(row=0, column=3, sticky="news", padx=5, pady=10)
 
 # Grid for command text fields
-commands_frame = tk.Frame(l_frame)
-commands_frame.grid(row=5, column=0, sticky="news")
-commands_frame.columnconfigure(0, weight=1)
-commands_frame.columnconfigure(1, weight=1)
-commands_frame.rowconfigure(0, weight=1)
-commands_frame.rowconfigure(1, weight=1)
+controls_frame = tk.Frame(l_frame)
+controls_frame.grid(row=5, column=0, sticky="news")
+controls_frame.columnconfigure(0, weight=1)
+controls_frame.columnconfigure(1, weight=1)
+controls_frame.rowconfigure(0, weight=1)
+controls_frame.rowconfigure(1, weight=1)
 
 # Button and label for copying yt-dlp command
-full_video_command_tip_button = tk.Button(commands_frame, text="Copy to clipboard", font=('Arial', 13), height = 1, width=20, command=lambda: th.Thread(target=copy_to_clipboard("full", command_var)).start())
+full_video_command_tip_button = tk.Button(controls_frame, text="Copy to clipboard", font=('Arial', 13), height = 1, width=20, command=lambda: th.Thread(target=copy_to_clipboard("full", command_var)).start())
 full_video_command_tip_button.grid(row=0, column=0, sticky="ew", padx=5)
-full_video_command_title = tk.Label(commands_frame, textvariable=full_video_command_text, font=('Arial', 10), height = 1, width = 50, anchor="w")
+full_video_command_title = tk.Label(controls_frame, textvariable=full_video_command_text, font=('Arial', 10), height = 1, width = 50, anchor="w")
 full_video_command_title.grid(row=0, column=1, sticky="e")
 
 # Button and label for copying FFMPEG command
-clip_command_tip_button = tk.Button(commands_frame, text="Copy to clipboard", font=('Arial', 13), height = 1, width=20, command=lambda: th.Thread(target=copy_to_clipboard("clip", cutter_var)).start())
+clip_command_tip_button = tk.Button(controls_frame, text="Copy to clipboard", font=('Arial', 13), height = 1, width=20, command=lambda: th.Thread(target=copy_to_clipboard("clip", cutter_var)).start())
 clip_command_tip_button.grid(row=1, column=0, sticky="ew", padx=5)
-clip_command_title = tk.Label(commands_frame, textvariable=clip_command_text, font=('Arial', 10), height = 1, width = 50, anchor="w")
+clip_command_title = tk.Label(controls_frame, textvariable=clip_command_text, font=('Arial', 10), height = 1, width = 50, anchor="w")
 clip_command_title.grid(row=1, column=1, sticky="e")
 
 # Start process
