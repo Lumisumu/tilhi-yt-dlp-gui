@@ -18,7 +18,7 @@ Extract ffmpeg folder. Move ffmpeg.exe, ffprobe.exe and yt-dlp.exe to the same f
 
 Only required input field is the url address of the video page you want to download from. Videos are downloaded in webm file format. Pressing Enter key when typing into url field starts the download process instantly.
 
-If you want to download multiple videos in succession, use a custom link list. Create a .txt file into "lists" folder. For example, if you text file is called "MyVideos" type MyVideos.txt into the url field. You can use the custom full videos save location and audio-only download functions with this, but other functions are disabled for link list downloads. Write only one link per line in the txt file.
+If you want to download multiple videos in succession, use a custom link list. Create a .txt file into "lists" folder. For example, if you text file is called "MyVideos" type "MyVideos.txt" into the url field. You can use the custom full videos save location and audio-only download functions with this, but other functions are disabled for link list downloads. Write only one link per line in the txt file.
 
 You can also a clip by filling timestamp field and it uses HH:MM:SS format. Only ending timestamp is required, starting timestamp starts from 00:00:00 by default. Empty fields are filled with "00". Program downloads the full video first, then cuts a clip into a different folder with ffmpeg.
 
@@ -26,7 +26,7 @@ After making a clip, you can make another one by filling in new timestamps. The 
 
 If you check the audio-only option, both full video and the clips are downloaded in audio-only format. Audio file format is m4a.
 
-Click on the "?" buttons to view more tips on each section.
+Click on the "?" buttons to view more tips for each section.
 
 ## Installing and running project
 
