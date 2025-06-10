@@ -346,7 +346,8 @@ def start_download():
 
 
 # Set working directory
-exe_dir = os.path.dirname(sys.executable)
+working_directory = os.path.dirname(sys.executable)
+os.chdir(working_directory)
 
 # Create window
 window = tk.Tk()
