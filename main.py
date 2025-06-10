@@ -344,6 +344,10 @@ def start_download():
             else:
                 show_success_message(file_location)
 
+
+# Set working directory
+exe_dir = os.path.dirname(sys.executable)
+
 # Create window
 window = tk.Tk()
 window.title("Tilhi yt-dlp GUI")
